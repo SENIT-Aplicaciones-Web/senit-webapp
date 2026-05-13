@@ -1,0 +1,35 @@
+{
+  "brand": {
+    "name": "Senit",
+    "tagline": "Smart hotel management",
+    "copyright": "© 2026 Senit - All rights reserved"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInSubtitle": "Enter your data to continue",
+    "signUpTitle": "Create your account",
+    "signUpSubtitle": "Complete your information to get started",
+    "email": "Enter your email address",
+    "username": "Enter your username",
+    "password": "Enter your password",
+    "createPassword": "Create a password",
+    "forgotPassword": "Forgot your password?",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "invalidCredentials": "Invalid credentials",
+    "registeredSuccessfully": "User registered successfully"
+  },
+  "dashboard": {
+    "title": "Main dashboard",
+    "content": "SENIT application home."
+  },
+  "pageNotFound": {
+    "title": "Page not found",
+    "content": "The path {route} is not available.",
+    "goHome": "Go home"
+  },
+  "language": {
+    "es": "ES",
+    "en": "EN"
+  }
+}

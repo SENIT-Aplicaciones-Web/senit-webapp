@@ -1,0 +1,35 @@
+{
+  "brand": {
+    "name": "Senit",
+    "tagline": "Gestión hotelera inteligente",
+    "copyright": "© 2026 Senit - Todos los derechos reservados"
+  },
+  "auth": {
+    "signInTitle": "Iniciar sesión",
+    "signInSubtitle": "Ingresa tus datos para continuar",
+    "signUpTitle": "Crea tu cuenta",
+    "signUpSubtitle": "Completa tus datos para empezar",
+    "email": "Ingrese su correo electrónico",
+    "username": "Ingrese su nombre de usuario",
+    "password": "Ingrese su contraseña",
+    "createPassword": "Cree una contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "signIn": "Ingresar",
+    "signUp": "Registrarse",
+    "invalidCredentials": "Credenciales inválidas",
+    "registeredSuccessfully": "Usuario registrado correctamente"
+  },
+  "dashboard": {
+    "title": "Panel principal",
+    "content": "Inicio de la aplicación SENIT."
+  },
+  "pageNotFound": {
+    "title": "Página no encontrada",
+    "content": "La ruta {route} no está disponible.",
+    "goHome": "Ir al inicio"
+  },
+  "language": {
+    "es": "ES",
+    "en": "EN"
+  }
+}
