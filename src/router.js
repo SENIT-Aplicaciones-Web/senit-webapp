@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import iamRoutes from './iam/presentation/iam-routes.js'
-
-const dashboardPlaceholder = () =>
-    import('./shared/presentation/views/dashboard-placeholder.vue')
+import frontDeskRoutes from './front-desk/presentation/front-desk-routes.js'
 
 const pageNotFound = () =>
     import('./shared/presentation/views/page-not-found.vue')
@@ -18,10 +16,9 @@ const routes = [
         children: iamRoutes
     },
     {
-        path: '/app/dashboard',
-        name: 'app-dashboard',
-        component: dashboardPlaceholder,
-        meta: { title: 'Dashboard' }
+        path: '/front-desk',
+        name: 'front-desk',
+        children: frontDeskRoutes
     },
     {
         path: '/:pathMatch(.*)*',

@@ -24,7 +24,9 @@ function onSignUp() {
   const success = iamStore.signUp(command)
 
   if (success) {
-    router.push({ name: 'app-dashboard' })
+    if (iamStore.currentUser?.role === 'FRONT_DESK') {
+      router.push({ name: 'front-desk-dashboard' })
+    }
   }
 }
 

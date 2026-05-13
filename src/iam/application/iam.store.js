@@ -5,10 +5,10 @@ import { User } from '../domain/model/user.entity.js'
 const mockUsers = ref([
     {
         id: 1,
-        email: 'admin@senit.com',
-        username: 'admin',
+        email: 'recepcion@senit.com',
+        username: 'recepcionista',
         password: '123456',
-        role: 'HOTEL_MANAGER'
+        role: 'FRONT_DESK'
     }
 ])
 
@@ -51,7 +51,7 @@ const useIamStore = defineStore('iam', () => {
             email: command.email,
             username: command.username,
             password: command.password,
-            role: 'HOTEL_MANAGER'
+            role: 'FRONT_DESK'
         }
 
         mockUsers.value.push(newUser)

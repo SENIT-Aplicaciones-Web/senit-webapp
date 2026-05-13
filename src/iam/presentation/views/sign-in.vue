@@ -22,7 +22,9 @@ function onSignIn() {
   const success = iamStore.signIn(command)
 
   if (success) {
-    router.push({ name: 'app-dashboard' })
+    if (iamStore.currentUser?.role === 'FRONT_DESK') {
+      router.push({ name: 'front-desk-dashboard' })
+    }
   }
 }
 
