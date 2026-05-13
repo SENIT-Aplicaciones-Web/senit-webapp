@@ -189,6 +189,41 @@
       "systemVersion": "System version",
       "connectionStatus": "Connection status",
       "encrypted": "Encrypted (AES - 256)"
+    },
+    "reservations": {
+      "title": "Reservation Register",
+      "subtitle": "Manage lodging reservations.",
+      "globalSearch": "Search reservation, guest or room...",
+      "newReservation": "New reservation",
+      "activeReservations": "Active reservations",
+      "searchByName": "Search by name",
+      "name": "Name",
+      "location": "Location",
+      "startDate": "Start date",
+      "startTime": "Start time",
+      "endDate": "End date",
+      "endTime": "End time",
+      "cancel": "Cancel",
+      "noResults": "No reservations found"
+    },
+    "reservationForm": {
+      "title": "Reservations",
+      "subtitle": "Manage lodging reservations.",
+      "globalSearch": "Search reservation, guest or room...",
+      "ownerData": "Owner data",
+      "reservationData": "Reservation data",
+      "fullName": "Owner name",
+      "dni": "ID Number",
+      "phone": "Phone",
+      "email": "Email address",
+      "room": "Room",
+      "selectRoom": "Select a room",
+      "guestsQuantity": "Number of guests",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "create": "Create reservation",
+      "cancel": "Cancel",
+      "createdSuccessfully": "Reservation created successfully"
     }
   }
 }

@@ -8,6 +8,7 @@ const frontDeskAlerts = () => import('./views/front-desk-alerts.vue')
 const frontDeskSettings = () => import('./views/front-desk-settings.vue')
 const stayDetails = () => import('./views/check-in-flow/stay-details.vue')
 const stayCheckout = () => import('./views/check-in-flow/stay-checkout.vue')
+const frontDeskReservationForm = () => import('./views/front-desk-reservation-form.vue')
 
 const frontDeskRoutes = [
     {
@@ -43,6 +44,12 @@ const frontDeskRoutes = [
                 name: 'front-desk-reservations',
                 component: frontDeskReservations,
                 meta: { title: 'Reservas' }
+            },
+            {
+                path: 'reservations/new',
+                name: 'front-desk-reservation-new',
+                component: frontDeskReservationForm,
+                meta: { title: 'Nueva Reserva' }
             },
             {
                 path: 'alerts',

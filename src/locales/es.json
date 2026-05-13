@@ -189,6 +189,41 @@
       "systemVersion": "Versión del sistema",
       "connectionStatus": "Estado de conexión",
       "encrypted": "Encriptado (AES - 256)"
+    },
+    "reservations": {
+      "title": "Registro de Reservas",
+      "subtitle": "Gestiona las reservas del hospedaje.",
+      "globalSearch": "Buscar reserva, huésped o habitación...",
+      "newReservation": "Nueva reserva",
+      "activeReservations": "Reservas activas",
+      "searchByName": "Buscar por nombre",
+      "name": "Nombre",
+      "location": "Ubicación",
+      "startDate": "Fecha de inicio",
+      "startTime": "Hora de inicio",
+      "endDate": "Fecha de salida",
+      "endTime": "Hora de salida",
+      "cancel": "Cancelar",
+      "noResults": "No se encontraron reservas"
+    },
+    "reservationForm": {
+      "title": "Reservas",
+      "subtitle": "Gestiona las reservas del hospedaje.",
+      "globalSearch": "Buscar reserva, huésped o habitación...",
+      "ownerData": "Datos del titular",
+      "reservationData": "Datos de la reserva",
+      "fullName": "Nombre del titular",
+      "dni": "DNI",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "room": "Habitación",
+      "selectRoom": "Seleccione una habitación",
+      "guestsQuantity": "Cantidad de huéspedes",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de salida",
+      "create": "Crear reserva",
+      "cancel": "Cancelar",
+      "createdSuccessfully": "Reserva creada correctamente"
     }
   }
 }
