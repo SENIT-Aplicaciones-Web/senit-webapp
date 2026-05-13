@@ -50,6 +50,31 @@
         "cleaning": "Limpieza",
         "maintenance": "Mantenimiento"
       }
+    },
+    "stays": {
+      "title": "Estadías",
+      "subtitle": "Gestión centralizada de huéspedes activos, salidas y pagos.",
+      "searchPlaceholder": "Buscar huésped, habitación o estado...",
+      "newReservation": "Nueva reserva",
+      "searchGuest": "Buscar huésped",
+      "active": "Estadías activas",
+      "checkOutsToday": "Salidas hoy",
+      "endingSoon": "Por vencer",
+      "room": "Habitación",
+      "guest": "Huésped",
+      "checkIn": "Ingreso",
+      "checkOut": "Salida",
+      "statusLabel": "Estado",
+      "amount": "Monto",
+      "actions": "Acciones",
+      "checkOutAction": "Check-out",
+      "viewDetail": "Ver detalle",
+      "noResults": "No se encontraron estadías",
+      "status": {
+        "active": "Activa",
+        "endingSoon": "Por vencer",
+        "finished": "Finalizada"
+      }
     }
   }
 }

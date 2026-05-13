@@ -50,6 +50,31 @@
         "cleaning": "Cleaning",
         "maintenance": "Maintenance"
       }
+    },
+    "stays": {
+      "title": "Stays",
+      "subtitle": "Centralized management of active guests, departures and payments.",
+      "searchPlaceholder": "Search guest, room or status...",
+      "newReservation": "New reservation",
+      "searchGuest": "Search guest",
+      "active": "Active stays",
+      "checkOutsToday": "Check-outs today",
+      "endingSoon": "Ending soon",
+      "room": "Room",
+      "guest": "Guest",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "statusLabel": "Status",
+      "amount": "Amount",
+      "actions": "Actions",
+      "checkOutAction": "Check-out",
+      "viewDetail": "View detail",
+      "noResults": "No stays found",
+      "status": {
+        "active": "Active",
+        "endingSoon": "Ending soon",
+        "finished": "Finished"
+      }
     }
   }
 }
