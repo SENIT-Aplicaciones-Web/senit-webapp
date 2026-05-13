@@ -75,6 +75,26 @@
         "endingSoon": "Por vencer",
         "finished": "Finalizada"
       }
+    },
+    "checkIn": {
+      "title": "Check-in",
+      "subtitle": "Ingrese los datos del huésped y asigne una habitación.",
+      "searchPlaceholder": "Buscar habitación, huésped o reserva...",
+      "guestInformation": "Información del huésped titular",
+      "name": "Nombre",
+      "dni": "DNI",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "stayDetails": "Detalles de estadía",
+      "room": "Habitación",
+      "selectRoom": "Seleccione una habitación",
+      "hours": "Horas de estadía",
+      "summary": "Resumen de la estadía",
+      "pricePerHour": "Costo por hora",
+      "checkoutLimit": "Fecha límite de salida",
+      "initialAmount": "Monto inicial",
+      "submit": "Check in",
+      "back": "Volver"
     }
   }
 }

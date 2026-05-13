@@ -75,6 +75,26 @@
         "endingSoon": "Ending soon",
         "finished": "Finished"
       }
+    },
+    "checkIn": {
+      "title": "Check-in",
+      "subtitle": "Enter guest information and assign a room.",
+      "searchPlaceholder": "Search room, guest or reservation...",
+      "guestInformation": "Main guest information",
+      "name": "Name",
+      "dni": "ID Number",
+      "phone": "Phone",
+      "email": "Email address",
+      "stayDetails": "Stay details",
+      "room": "Room",
+      "selectRoom": "Select a room",
+      "hours": "Stay hours",
+      "summary": "Stay summary",
+      "pricePerHour": "Price per hour",
+      "checkoutLimit": "Checkout deadline",
+      "initialAmount": "Initial amount",
+      "submit": "Check in",
+      "back": "Back"
     }
   }
 }
