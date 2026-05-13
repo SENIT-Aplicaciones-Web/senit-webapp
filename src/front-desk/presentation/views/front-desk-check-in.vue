@@ -49,7 +49,10 @@ const checkoutLimit = computed(() => {
 })
 
 function submitCheckIn() {
-  alert(`Check-in registrado para ${form.value.name || 'huésped'} en habitación ${form.value.roomId}`)
+  router.push({
+    name: 'front-desk-stay-details',
+    params: { id: 1 }
+  })
 }
 
 function goBack() {

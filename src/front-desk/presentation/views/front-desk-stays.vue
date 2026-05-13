@@ -1,7 +1,9 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const { t } = useI18n()
 
 const searchTerm = ref('')
@@ -49,11 +51,17 @@ const filteredStays = computed(() => {
 })
 
 function checkoutStay(stay) {
-  stay.status = 'finished'
+  router.push({
+    name: 'front-desk-stay-checkout',
+    params: { id: stay.id }
+  })
 }
 
 function viewDetails(stay) {
-  alert(`Detalle de estadía: Habitación ${stay.room} - ${stay.guest}`)
+  router.push({
+    name: 'front-desk-stay-details',
+    params: { id: stay.id }
+  })
 }
 </script>
 
