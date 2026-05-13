@@ -31,5 +31,25 @@
   "language": {
     "es": "ES",
     "en": "EN"
+  },
+  "frontDesk": {
+    "rooms": {
+      "title": "Rooms View",
+      "subtitle": "Centralized management of floor status and reservations.",
+      "searchPlaceholder": "Search room, guest or type...",
+      "newReservation": "New reservation",
+      "floor": "Floor",
+      "type": "Type",
+      "state": "Status",
+      "all": "All",
+      "noResults": "No rooms found",
+      "status": {
+        "occupied": "Occupied",
+        "available": "Available",
+        "blocked": "Blocked",
+        "cleaning": "Cleaning",
+        "maintenance": "Maintenance"
+      }
+    }
   }
 }

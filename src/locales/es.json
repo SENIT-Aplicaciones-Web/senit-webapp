@@ -31,5 +31,25 @@
   "language": {
     "es": "ES",
     "en": "EN"
+  },
+  "frontDesk": {
+    "rooms": {
+      "title": "Vista de Habitaciones",
+      "subtitle": "Gestión centralizada del estado de planta y reservas.",
+      "searchPlaceholder": "Buscar habitación, huésped o tipo...",
+      "newReservation": "Nueva reserva",
+      "floor": "Piso",
+      "type": "Tipo",
+      "state": "Estado",
+      "all": "Todos",
+      "noResults": "No se encontraron habitaciones",
+      "status": {
+        "occupied": "Ocupada",
+        "available": "Disponible",
+        "blocked": "Bloqueada",
+        "cleaning": "Limpieza",
+        "maintenance": "Mantenimiento"
+      }
+    }
   }
 }
