@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import iamRoutes from './iam/presentation/iam-routes.js'
 import frontDeskRoutes from './front-desk/presentation/front-desk-routes.js'
 
@@ -29,7 +29,7 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHashHistory(import.meta.env.BASE_URL),
     routes
 })
 
