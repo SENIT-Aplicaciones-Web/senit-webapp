@@ -7,9 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist",
-    "api": "npx json-server --watch server/db.json --port 3000",
-    "dev:full": "npm run api -- --host 0.0.0.0 & npm run dev"
+    "api": "json-server --watch server/db.json --port 3000",
+    "api:render": "json-server --watch server/db.json --host 0.0.0.0 --port $PORT"
   },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
