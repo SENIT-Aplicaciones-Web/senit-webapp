@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import useIamStore from '../../application/iam.store.js'
@@ -10,48 +10,51 @@ const { t } = useI18n()
 const router = useRouter()
 const iamStore = useIamStore()
 
+onMounted(() => iamStore.clearMessages())
+
 const email = ref('')
 const username = ref('')
 const password = ref('')
+const showPassword = ref(false)
+const submitted = ref(false)
+const formErrors = computed(() => {
+  const errors = []
+  if (!email.value.trim() || !email.value.includes('@')) errors.push('auth.validation-email')
+  if (!username.value.trim()) errors.push('auth.validation-username')
+  if (!password.value || password.value.length < 6) errors.push('auth.validation-password')
+  return errors
+})
 
-function onSignUp() {
+async function onSignUp() {
+  submitted.value = true
+  if (formErrors.value.length) return
+
   const command = new SignUpCommand({
     email: email.value,
     username: username.value,
     password: password.value
   })
 
-  const success = iamStore.signUp(command)
+  const success = await iamStore.signUp(command)
 
   if (success) {
-    if (iamStore.currentUser?.role === 'FRONT_DESK') {
-      router.push({ name: 'front-desk-dashboard' })
-    }
+    window.setTimeout(() => router.push({ name: 'admin-dashboard' }), 700)
   }
 }
 
 function goToSignIn() {
-  router.push({ name: 'iam-sign-in' })
+  router.push({ name: 'sign-in' })
 }
 </script>
 
 <template>
   <main class="auth-page">
-    <language-switcher />
+    <language-switcher floating />
 
     <section class="brand-section">
       <div class="brand-content">
-        <div class="logo-mark">
-          <div class="mark-block big"></div>
-          <div class="mark-block small"></div>
-          <div class="mark-block small"></div>
-          <div class="mark-block big"></div>
-        </div>
-
-        <div>
-          <h1>{{ t('brand.name') }}</h1>
-          <p>{{ t('brand.tagline') }}</p>
-        </div>
+        <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
+        <p class="brand-tagline">{{ t('brand.tagline') }}</p>
       </div>
     </section>
 
@@ -59,26 +62,33 @@ function goToSignIn() {
 
     <section class="form-section">
       <div class="auth-card">
-        <h2>{{ t('auth.signUpTitle') }}</h2>
-        <p class="subtitle">{{ t('auth.signUpSubtitle') }}</p>
+        <h2>{{ t('auth.sign-up-title') }}</h2>
+        <p class="subtitle">{{ t('auth.sign-up-subtitle') }}</p>
+        <p class="admin-notice">{{ t('auth.admin-owner-notice') }}</p>
 
         <form @submit.prevent="onSignUp">
           <label for="email">{{ t('auth.email') }}</label>
-          <pv-input-text id="email" v-model="email" type="email" class="auth-input" />
+          <span class="auth-input-icon"><i class="pi pi-envelope"></i><pv-input-text id="email" v-model="email" type="email" class="auth-input" /></span>
 
           <label for="username">{{ t('auth.username') }}</label>
-          <pv-input-text id="username" v-model="username" class="auth-input" />
+          <span class="auth-input-icon"><i class="pi pi-user"></i><pv-input-text id="username" v-model="username" class="auth-input" /></span>
 
-          <label for="password">{{ t('auth.createPassword') }}</label>
-          <pv-input-text id="password" v-model="password" type="password" class="auth-input" />
+          <label for="password">{{ t('auth.create-password') }}</label>
+          <span class="auth-input-icon"><i class="pi pi-lock"></i><pv-input-text id="password" v-model="password" :type="showPassword ? 'text' : 'password'" class="auth-input" /><button class="password-toggle" type="button" :aria-label="t('auth.toggle-password')" @click="showPassword = !showPassword"><i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i></button></span>
 
-          <p v-if="iamStore.successMessage" class="success-message">
+          <p v-if="submitted && formErrors.length" class="error-message">
+            {{ t(formErrors[0]) }}
+          </p>
+          <p v-else-if="iamStore.errors.length" class="error-message">
+            {{ t(iamStore.errors[0].message) }}
+          </p>
+          <p v-else-if="iamStore.successMessage" class="success-message">
             {{ t(iamStore.successMessage) }}
           </p>
 
           <div class="button-row">
-            <pv-button :label="t('auth.signIn')" type="button" class="auth-button" @click="goToSignIn" />
-            <pv-button :label="t('auth.signUp')" type="submit" class="auth-button" />
+            <pv-button :label="t('auth.register')" type="submit" class="auth-button" />
+            <pv-button :label="t('auth.back')" type="button" class="auth-button secondary-auth-button" @click="goToSignIn" />
           </div>
         </form>
       </div>
@@ -106,20 +116,20 @@ function goToSignIn() {
 
 .brand-content {
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  width: min(380px, 100%);
 }
 
-.logo-mark {
-  width: 104px;
-  height: 104px;
+.brand-logo-full {
+  width: min(320px, 100%);
+  height: auto;
+}
+
+.brand-copy {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.mark-block {
-  background: #0d6efd;
+  gap: 0.4rem;
 }
 
 .mark-block.big:first-child {
@@ -143,15 +153,7 @@ function goToSignIn() {
   background: #0d6efd;
 }
 
-.brand-content h1 {
-  font-size: 5.3rem;
-  line-height: 1;
-  margin: 0;
-  color: #062b6f;
-  font-weight: 800;
-}
-
-.brand-content p {
+.brand-tagline {
   margin: 1.4rem 0 0;
   font-size: 1.6rem;
   color: #9b9ba3;
@@ -210,6 +212,40 @@ label {
   font-size: 1.1rem;
 }
 
+.admin-notice {
+  margin: 0 0 0.9rem;
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.auth-input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-input-icon > i {
+  position: absolute;
+  left: 1rem;
+  color: #94a3b8;
+  z-index: 1;
+}
+
+.auth-input-icon .auth-input {
+  padding-left: 3rem !important;
+  padding-right: 3rem !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.8rem;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+}
+
 .button-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -217,18 +253,36 @@ label {
   margin-top: 2.4rem;
 }
 
-.auth-button {
+.auth-button,
+.auth-button.p-button {
   height: 74px;
   border-radius: 12px;
   font-size: 1.45rem;
   font-weight: 700;
-  background: #2563eb;
-  border: none;
+  background: #2563eb !important;
+  border: none !important;
+  color: #ffffff !important;
 }
 
 .success-message {
   color: #16a34a;
   margin: 1rem 0 0;
+}
+
+.error-message {
+  color: #dc2626;
+  margin: 1rem 0 0;
+}
+
+.secondary-auth-button,
+.secondary-auth-button.p-button {
+  background: #eef4ff !important;
+  border: 1px solid #bfdbfe !important;
+  color: #1e3a8a !important;
+}
+
+.secondary-auth-button :deep(.p-button-label) {
+  color: #1e3a8a !important;
 }
 
 footer {
@@ -252,9 +306,6 @@ footer {
     display: none;
   }
 
-  .brand-content h1 {
-    font-size: 3.8rem;
-  }
 
   .auth-card {
     padding: 2rem;

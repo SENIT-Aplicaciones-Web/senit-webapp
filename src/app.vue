@@ -1,8 +1,9 @@
 <script setup>
+import Layout from './shared/presentation/components/layout.vue'
 </script>
 
 <template>
-  <router-view />
+  <layout />
 </template>
 
 <style scoped>

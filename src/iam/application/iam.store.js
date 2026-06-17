@@ -1,84 +1,111 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { User } from '../domain/model/user.entity.js'
-
-const mockUsers = ref([
-    {
-        id: 1,
-        email: 'recepcion@senit.com',
-        username: 'recepcionista',
-        password: '123456',
-        role: 'FRONT_DESK'
-    }
-])
+import { AuthenticationApi } from '../infrastructure/authentication.api.js'
 
 const useIamStore = defineStore('iam', () => {
-    const currentUser = ref(null)
+    const users = ref([])
+    const currentUser = ref(AuthenticationApi.getCurrentUser())
     const errors = ref([])
     const successMessage = ref('')
 
     const isAuthenticated = computed(() => currentUser.value !== null)
+    const isAdmin = computed(() => currentUser.value?.role === 'ADMIN')
+    const isFrontDesk = computed(() => currentUser.value?.role === 'FRONT_DESK')
 
-    function signIn(command) {
-        errors.value = []
-        successMessage.value = ''
-
-        const userFound = mockUsers.value.find(user =>
-            user.email === command.email && user.password === command.password
-        )
-
-        if (!userFound) {
-            errors.value.push(new Error('auth.invalidCredentials'))
-            return false
-        }
-
-        currentUser.value = new User({
-            id: userFound.id,
-            email: userFound.email,
-            username: userFound.username,
-            role: userFound.role
-        })
-
-        return true
+    async function loadUsers() {
+        users.value = await AuthenticationApi.getUsers()
+        return users.value
     }
 
-    function signUp(command) {
+    async function signIn(command) {
         errors.value = []
         successMessage.value = ''
 
-        const newUser = {
-            id: mockUsers.value.length + 1,
-            email: command.email,
-            username: command.username,
-            password: command.password,
-            role: 'FRONT_DESK'
+        try {
+            const authenticatedUser = await AuthenticationApi.signIn(command)
+            if (!authenticatedUser) {
+                errors.value.push(new Error('auth.invalid-credentials'))
+                return false
+            }
+            currentUser.value = authenticatedUser
+            await loadUsers()
+            return true
+        } catch (error) {
+            errors.value.push(new Error('auth.api-unavailable'))
+            return false
         }
+    }
 
-        mockUsers.value.push(newUser)
+    async function signUp(command) {
+        errors.value = []
+        successMessage.value = ''
 
-        currentUser.value = new User({
-            id: newUser.id,
-            email: newUser.email,
-            username: newUser.username,
-            role: newUser.role
-        })
+        try {
+            const registeredUser = await AuthenticationApi.signUp(command)
+            if (!registeredUser) {
+                errors.value.push(new Error('auth.email-already-exists'))
+                return false
+            }
+            currentUser.value = registeredUser
+            await loadUsers()
+            successMessage.value = 'auth.registered-successfully'
+            return true
+        } catch (error) {
+            errors.value.push(new Error('auth.api-unavailable'))
+            return false
+        }
+    }
 
-        successMessage.value = 'auth.registeredSuccessfully'
+    async function refreshUsers() {
+        try {
+            users.value = await AuthenticationApi.getUsers()
+        } catch (error) {
+            users.value = []
+        }
+    }
 
-        return true
+    async function changePassword(newPassword) {
+        errors.value = []
+        successMessage.value = ''
+        if (!currentUser.value) return false
+        try {
+            const updatedUser = await AuthenticationApi.updatePassword(currentUser.value.id, newPassword)
+            currentUser.value = updatedUser
+            successMessage.value = 'front-desk.settings.password-updated'
+            return true
+        } catch (error) {
+            errors.value.push(new Error('front-desk.settings.password-update-error'))
+            return false
+        }
+    }
+
+    function clearMessages() {
+        errors.value = []
+        successMessage.value = ''
     }
 
     function signOut() {
+        clearMessages()
         currentUser.value = null
+        AuthenticationApi.signOut()
     }
 
+    refreshUsers()
+
     return {
+        users,
         currentUser,
         errors,
         successMessage,
         isAuthenticated,
+        isAdmin,
+        isFrontDesk,
+        loadUsers,
         signIn,
         signUp,
+        refreshUsers,
+        changePassword,
+        clearMessages,
         signOut
     }
 })

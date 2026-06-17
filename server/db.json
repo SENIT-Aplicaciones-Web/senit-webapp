@@ -1,0 +1,793 @@
+{
+  "hotels": [
+    {
+      "id": "1",
+      "name": "Senit Hotel Centro",
+      "ruc": "20555555551",
+      "address": "Av. Principal 125, Miraflores, Lima",
+      "phone": "987654321",
+      "email": "administracion@senit.com",
+      "plan": "Pro",
+      "createdAt": "2026-06-01T00:00:00.000Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "fullName": "Usuario Administrativo",
+      "username": "administrador",
+      "email": "admin@admin.com",
+      "password": "123456",
+      "role": "ADMIN",
+      "status": "active",
+      "createdAt": "2026-06-01T01:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "fullName": "Usuario Recepción",
+      "username": "recepcion",
+      "email": "recepcion@recepcion.com",
+      "password": "12345",
+      "role": "FRONT_DESK",
+      "status": "active",
+      "createdAt": "2026-06-01T02:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "fullName": "Carla Mendoza Ruiz",
+      "username": "cmendoza",
+      "email": "carla.mendoza@senit.com",
+      "password": "12345",
+      "role": "FRONT_DESK",
+      "status": "active",
+      "createdAt": "2026-06-05T09:15:00.000Z"
+    },
+    {
+      "id": "4",
+      "hotelId": "1",
+      "fullName": "Luis Ramírez Soto",
+      "username": "lramirez",
+      "email": "luis.ramirez@senit.com",
+      "password": "12345",
+      "role": "FRONT_DESK",
+      "status": "active",
+      "createdAt": "2026-06-07T10:30:00.000Z"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "number": "101",
+      "floor": 1,
+      "type": "Standard",
+      "capacity": 2,
+      "pricePerHour": 20,
+      "status": "occupied"
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "number": "102",
+      "floor": 1,
+      "type": "Standard",
+      "capacity": 2,
+      "pricePerHour": 20,
+      "status": "cleaning"
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "number": "103",
+      "floor": 1,
+      "type": "Deluxe",
+      "capacity": 2,
+      "pricePerHour": 30,
+      "status": "available"
+    },
+    {
+      "id": "4",
+      "hotelId": "1",
+      "number": "104",
+      "floor": 1,
+      "type": "Standard",
+      "capacity": 2,
+      "pricePerHour": 20,
+      "status": "available"
+    },
+    {
+      "id": "5",
+      "hotelId": "1",
+      "number": "201",
+      "floor": 2,
+      "type": "Deluxe",
+      "capacity": 2,
+      "pricePerHour": 30,
+      "status": "occupied"
+    },
+    {
+      "id": "6",
+      "hotelId": "1",
+      "number": "202",
+      "floor": 2,
+      "type": "Suite",
+      "capacity": 3,
+      "pricePerHour": 40,
+      "status": "occupied"
+    },
+    {
+      "id": "7",
+      "hotelId": "1",
+      "number": "203",
+      "floor": 2,
+      "type": "Suite",
+      "capacity": 3,
+      "pricePerHour": 40,
+      "status": "maintenance"
+    },
+    {
+      "id": "8",
+      "hotelId": "1",
+      "number": "204",
+      "floor": 2,
+      "type": "Deluxe",
+      "capacity": 2,
+      "pricePerHour": 30,
+      "status": "available"
+    },
+    {
+      "id": "9",
+      "hotelId": "1",
+      "number": "301",
+      "floor": 3,
+      "type": "Standard",
+      "capacity": 2,
+      "pricePerHour": 20,
+      "status": "occupied"
+    },
+    {
+      "id": "10",
+      "hotelId": "1",
+      "number": "302",
+      "floor": 3,
+      "type": "Deluxe",
+      "capacity": 2,
+      "pricePerHour": 30,
+      "status": "cleaning"
+    },
+    {
+      "id": "11",
+      "hotelId": "1",
+      "number": "303",
+      "floor": 3,
+      "type": "Suite",
+      "capacity": 4,
+      "pricePerHour": 40,
+      "status": "available"
+    },
+    {
+      "id": "12",
+      "hotelId": "1",
+      "number": "304",
+      "floor": 3,
+      "type": "Standard",
+      "capacity": 2,
+      "pricePerHour": 20,
+      "status": "available"
+    },
+    {
+      "id": "13",
+      "hotelId": "1",
+      "number": "401",
+      "floor": 4,
+      "type": "Deluxe",
+      "capacity": 2,
+      "pricePerHour": 30,
+      "status": "available"
+    },
+    {
+      "id": "14",
+      "hotelId": "1",
+      "number": "402",
+      "floor": 4,
+      "type": "Suite",
+      "capacity": 4,
+      "pricePerHour": 40,
+      "status": "maintenance"
+    },
+    {
+      "id": "15",
+      "hotelId": "1",
+      "number": "403",
+      "floor": 4,
+      "type": "Standard",
+      "capacity": 2,
+      "pricePerHour": 20,
+      "status": "available"
+    }
+  ],
+  "reservations": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "roomId": "3",
+      "guestName": "María Gracia Torres",
+      "dni": "71234567",
+      "phone": "987111222",
+      "email": "maria.gracia@example.com",
+      "startAt": "2026-06-16T10:00:00",
+      "endAt": "2026-06-16T16:00:00",
+      "status": "finished",
+      "hours": 6,
+      "reservationAmount": 180,
+      "prepaidAmount": 180,
+      "paymentMethod": "card",
+      "paymentStatus": "paid",
+      "paidAt": "2026-06-15T10:00:00",
+      "createdAt": "2026-06-15T09:40:00"
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "roomId": "6",
+      "guestName": "James Wilson Carter",
+      "dni": "81234567",
+      "phone": "987333444",
+      "email": "james.wilson@example.com",
+      "startAt": "2026-06-17T12:00:00",
+      "endAt": "2026-06-17T20:00:00",
+      "status": "confirmed",
+      "hours": 8,
+      "reservationAmount": 320,
+      "prepaidAmount": 320,
+      "paymentMethod": "card",
+      "paymentStatus": "paid",
+      "paidAt": "2026-06-16T11:30:00",
+      "createdAt": "2026-06-16T11:15:00"
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "roomId": "11",
+      "guestName": "Andrea Vargas Paredes",
+      "dni": "70112233",
+      "phone": "987444555",
+      "email": "andrea.vargas@example.com",
+      "startAt": "2026-06-18T09:00:00",
+      "endAt": "2026-06-18T15:00:00",
+      "status": "confirmed",
+      "hours": 6,
+      "reservationAmount": 240,
+      "prepaidAmount": 240,
+      "paymentMethod": "yape",
+      "paymentStatus": "paid",
+      "paidAt": "2026-06-16T15:20:00",
+      "createdAt": "2026-06-16T15:10:00"
+    },
+    {
+      "id": "4",
+      "hotelId": "1",
+      "roomId": "13",
+      "guestName": "Pedro Salazar Núñez",
+      "dni": "72889911",
+      "phone": "987666777",
+      "email": "pedro.salazar@example.com",
+      "startAt": "2026-06-19T18:00:00",
+      "endAt": "2026-06-20T08:00:00",
+      "status": "confirmed",
+      "hours": 14,
+      "reservationAmount": 420,
+      "prepaidAmount": 420,
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "paidAt": "2026-06-16T18:40:00",
+      "createdAt": "2026-06-16T18:25:00"
+    },
+    {
+      "id": "5",
+      "hotelId": "1",
+      "roomId": "8",
+      "guestName": "Valeria Castillo Rojas",
+      "dni": "73334455",
+      "phone": "987888999",
+      "email": "valeria.castillo@example.com",
+      "startAt": "2026-06-18T20:00:00",
+      "endAt": "2026-06-19T08:00:00",
+      "status": "cancelled",
+      "hours": 12,
+      "reservationAmount": 360,
+      "prepaidAmount": 360,
+      "paymentMethod": "card",
+      "paymentStatus": "paid",
+      "paidAt": "2026-06-15T16:00:00",
+      "createdAt": "2026-06-15T15:50:00"
+    }
+  ],
+  "guests": [
+    {
+      "id": "1",
+      "fullName": "Alex Thompson Reed",
+      "dni": "70123456",
+      "phone": "987654321",
+      "email": "alex.thompson@example.com"
+    },
+    {
+      "id": "2",
+      "fullName": "Lucía Fernández López",
+      "dni": "73456789",
+      "phone": "987222111",
+      "email": "lucia.fernandez@example.com"
+    },
+    {
+      "id": "3",
+      "fullName": "Lewis Hamilton Pérez",
+      "dni": "74567890",
+      "phone": "987555666",
+      "email": "lewis.hamilton@example.com"
+    },
+    {
+      "id": "4",
+      "fullName": "Sofía Rivas Camacho",
+      "dni": "75678901",
+      "phone": "987777888",
+      "email": "sofia.rivas@example.com"
+    },
+    {
+      "id": "5",
+      "fullName": "Diego Morales Salas",
+      "dni": "76789012",
+      "phone": "987999000",
+      "email": "diego.morales@example.com"
+    },
+    {
+      "id": "6",
+      "fullName": "María Gracia Torres",
+      "dni": "71234567",
+      "phone": "987111222",
+      "email": "maria.gracia@example.com"
+    }
+  ],
+  "guest-stays": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "roomId": "9",
+      "guestId": "1",
+      "guest": {
+        "fullName": "Alex Thompson Reed",
+        "dni": "70123456",
+        "phone": "987654321",
+        "email": "alex.thompson@example.com"
+      },
+      "checkInAt": "2026-06-15T20:00:00",
+      "checkOutLimitAt": "2026-06-16T08:00:00",
+      "checkedOutAt": null,
+      "hours": 12,
+      "initialAmount": 240,
+      "prepaidAmount": 0,
+      "reservationId": null,
+      "paymentStatus": "pending",
+      "paymentMethod": "cash",
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "roomId": "5",
+      "guestId": "2",
+      "guest": {
+        "fullName": "Lucía Fernández López",
+        "dni": "73456789",
+        "phone": "987222111",
+        "email": "lucia.fernandez@example.com"
+      },
+      "checkInAt": "2026-06-16T09:30:00",
+      "checkOutLimitAt": "2026-06-16T15:30:00",
+      "checkedOutAt": null,
+      "hours": 6,
+      "initialAmount": 180,
+      "prepaidAmount": 0,
+      "reservationId": null,
+      "paymentStatus": "pending",
+      "paymentMethod": "yape",
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "roomId": "6",
+      "guestId": "3",
+      "guest": {
+        "fullName": "Lewis Hamilton Pérez",
+        "dni": "74567890",
+        "phone": "987555666",
+        "email": "lewis.hamilton@example.com"
+      },
+      "checkInAt": "2026-06-16T19:00:00",
+      "checkOutLimitAt": "2026-06-17T07:00:00",
+      "checkedOutAt": null,
+      "hours": 12,
+      "initialAmount": 480,
+      "prepaidAmount": 0,
+      "reservationId": null,
+      "paymentStatus": "pending",
+      "paymentMethod": "card",
+      "status": "active"
+    },
+    {
+      "id": "4",
+      "hotelId": "1",
+      "roomId": "1",
+      "guestId": "4",
+      "guest": {
+        "fullName": "Sofía Rivas Camacho",
+        "dni": "75678901",
+        "phone": "987777888",
+        "email": "sofia.rivas@example.com"
+      },
+      "checkInAt": "2026-06-16T21:00:00",
+      "checkOutLimitAt": "2026-06-17T05:00:00",
+      "checkedOutAt": null,
+      "hours": 8,
+      "initialAmount": 160,
+      "prepaidAmount": 0,
+      "reservationId": null,
+      "paymentStatus": "pending",
+      "paymentMethod": "cash",
+      "status": "active"
+    },
+    {
+      "id": "5",
+      "hotelId": "1",
+      "roomId": "3",
+      "guestId": "6",
+      "guest": {
+        "fullName": "María Gracia Torres",
+        "dni": "71234567",
+        "phone": "987111222",
+        "email": "maria.gracia@example.com"
+      },
+      "checkInAt": "2026-06-16T10:00:00",
+      "checkOutLimitAt": "2026-06-16T16:00:00",
+      "checkedOutAt": "2026-06-16T16:05:00",
+      "hours": 6,
+      "initialAmount": 180,
+      "prepaidAmount": 180,
+      "reservationId": "1",
+      "paymentStatus": "paid",
+      "paymentMethod": "card",
+      "status": "finished"
+    },
+    {
+      "id": "6",
+      "hotelId": "1",
+      "roomId": "4",
+      "guestId": "5",
+      "guest": {
+        "fullName": "Diego Morales Salas",
+        "dni": "76789012",
+        "phone": "987999000",
+        "email": "diego.morales@example.com"
+      },
+      "checkInAt": "2026-06-14T22:00:00",
+      "checkOutLimitAt": "2026-06-15T08:00:00",
+      "checkedOutAt": "2026-06-15T08:20:00",
+      "hours": 10,
+      "initialAmount": 200,
+      "prepaidAmount": 0,
+      "reservationId": null,
+      "paymentStatus": "paid",
+      "paymentMethod": "cash",
+      "status": "finished"
+    },
+    {
+      "id": "7",
+      "hotelId": "1",
+      "roomId": "8",
+      "guestId": "2",
+      "guest": {
+        "fullName": "Lucía Fernández López",
+        "dni": "73456789",
+        "phone": "987222111",
+        "email": "lucia.fernandez@example.com"
+      },
+      "checkInAt": "2026-06-13T10:00:00",
+      "checkOutLimitAt": "2026-06-13T18:00:00",
+      "checkedOutAt": "2026-06-13T18:10:00",
+      "hours": 8,
+      "initialAmount": 240,
+      "prepaidAmount": 0,
+      "reservationId": null,
+      "paymentStatus": "paid",
+      "paymentMethod": "card",
+      "status": "finished"
+    }
+  ],
+  "consumptions": [
+    {
+      "id": "1",
+      "stayId": "1",
+      "description": "Agua mineral",
+      "quantity": 2,
+      "unitPrice": 5,
+      "createdAt": "2026-06-15T21:05:00"
+    },
+    {
+      "id": "2",
+      "stayId": "1",
+      "description": "Snack bar",
+      "quantity": 1,
+      "unitPrice": 12,
+      "createdAt": "2026-06-15T22:20:00"
+    },
+    {
+      "id": "3",
+      "stayId": "2",
+      "description": "Lavandería express",
+      "quantity": 1,
+      "unitPrice": 25,
+      "createdAt": "2026-06-16T11:00:00"
+    },
+    {
+      "id": "4",
+      "stayId": "3",
+      "description": "Bebida en minibar",
+      "quantity": 2,
+      "unitPrice": 8,
+      "createdAt": "2026-06-16T20:00:00"
+    },
+    {
+      "id": "5",
+      "stayId": "5",
+      "description": "Servicio de habitación",
+      "quantity": 1,
+      "unitPrice": 35,
+      "createdAt": "2026-06-16T14:00:00"
+    },
+    {
+      "id": "6",
+      "stayId": "6",
+      "description": "Snack bar",
+      "quantity": 2,
+      "unitPrice": 10,
+      "createdAt": "2026-06-15T01:30:00"
+    },
+    {
+      "id": "7",
+      "stayId": "7",
+      "description": "Lavandería",
+      "quantity": 1,
+      "unitPrice": 20,
+      "createdAt": "2026-06-13T14:00:00"
+    }
+  ],
+  "payments": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "reservationId": "1",
+      "stayId": null,
+      "amount": 180,
+      "method": "card",
+      "status": "completed",
+      "paidAt": "2026-06-15T10:00:00"
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "reservationId": "2",
+      "stayId": null,
+      "amount": 320,
+      "method": "card",
+      "status": "completed",
+      "paidAt": "2026-06-16T11:30:00"
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "reservationId": "3",
+      "stayId": null,
+      "amount": 240,
+      "method": "yape",
+      "status": "completed",
+      "paidAt": "2026-06-16T15:20:00"
+    },
+    {
+      "id": "4",
+      "hotelId": "1",
+      "reservationId": "4",
+      "stayId": null,
+      "amount": 420,
+      "method": "cash",
+      "status": "completed",
+      "paidAt": "2026-06-16T18:40:00"
+    },
+    {
+      "id": "5",
+      "hotelId": "1",
+      "reservationId": "5",
+      "stayId": null,
+      "amount": 360,
+      "method": "card",
+      "status": "completed",
+      "paidAt": "2026-06-15T16:00:00"
+    },
+    {
+      "id": "6",
+      "hotelId": "1",
+      "reservationId": null,
+      "stayId": "5",
+      "amount": 35,
+      "method": "card",
+      "status": "completed",
+      "paidAt": "2026-06-16T16:03:00"
+    },
+    {
+      "id": "7",
+      "hotelId": "1",
+      "reservationId": null,
+      "stayId": "6",
+      "amount": 220,
+      "method": "cash",
+      "status": "completed",
+      "paidAt": "2026-06-15T08:18:00"
+    },
+    {
+      "id": "8",
+      "hotelId": "1",
+      "reservationId": null,
+      "stayId": "7",
+      "amount": 260,
+      "method": "card",
+      "status": "completed",
+      "paidAt": "2026-06-13T18:08:00"
+    }
+  ],
+  "invoices": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "stayId": "5",
+      "number": "B001-000001",
+      "issuedAt": "2026-06-16T16:05:00",
+      "amount": 215,
+      "status": "issued"
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "stayId": "6",
+      "number": "B001-000002",
+      "issuedAt": "2026-06-15T08:20:00",
+      "amount": 220,
+      "status": "issued"
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "stayId": "7",
+      "number": "B001-000003",
+      "issuedAt": "2026-06-13T18:10:00",
+      "amount": 260,
+      "status": "issued"
+    }
+  ],
+  "cleaning-tasks": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "roomId": "2",
+      "title": "Limpieza post check-out Hab. 102",
+      "status": "pending",
+      "createdAt": "2026-06-16T08:30:00",
+      "completedAt": null
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "roomId": "10",
+      "title": "Limpieza programada Hab. 302",
+      "status": "pending",
+      "createdAt": "2026-06-16T09:00:00",
+      "completedAt": null
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "roomId": "3",
+      "title": "Limpieza post check-out Hab. 103",
+      "status": "completed",
+      "createdAt": "2026-06-16T16:05:00",
+      "completedAt": "2026-06-16T16:45:00"
+    },
+    {
+      "id": "4",
+      "hotelId": "1",
+      "roomId": "4",
+      "title": "Limpieza post check-out Hab. 104",
+      "status": "completed",
+      "createdAt": "2026-06-15T08:20:00",
+      "completedAt": "2026-06-15T09:00:00"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "title": "Checkout pendiente",
+      "message": "Alex Thompson Reed superó la fecha límite de salida en la habitación 301.",
+      "type": "warning",
+      "createdAt": "2026-06-16T08:05:00",
+      "read": false
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "title": "Checkout pendiente",
+      "message": "Lucía Fernández López superó la fecha límite de salida en la habitación 201.",
+      "type": "warning",
+      "createdAt": "2026-06-16T15:35:00",
+      "read": false
+    },
+    {
+      "id": "3",
+      "hotelId": "1",
+      "title": "Nueva reserva registrada",
+      "message": "Andrea Vargas Paredes registró una reserva para la habitación 303.",
+      "type": "success",
+      "createdAt": "2026-06-16T15:20:00",
+      "read": false
+    },
+    {
+      "id": "4",
+      "hotelId": "1",
+      "title": "Reserva cancelada",
+      "message": "Se canceló la reserva de Valeria Castillo Rojas.",
+      "type": "warning",
+      "createdAt": "2026-06-15T16:20:00",
+      "read": true
+    },
+    {
+      "id": "5",
+      "hotelId": "1",
+      "title": "Limpieza pendiente",
+      "message": "La habitación 102 está pendiente de limpieza.",
+      "type": "info",
+      "createdAt": "2026-06-16T09:10:00",
+      "read": false
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "plan": "Pro",
+      "status": "active",
+      "monthlyAmount": 49.99,
+      "startedAt": "2026-06-01T00:00:00.000Z",
+      "updatedAt": "2026-06-16T11:02:00.000Z"
+    }
+  ],
+  "subscription-payments": [
+    {
+      "id": "1",
+      "hotelId": "1",
+      "plan": "Basic",
+      "amount": 29.99,
+      "status": "completed",
+      "paidAt": "2026-06-01T09:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "hotelId": "1",
+      "plan": "Pro",
+      "amount": 49.99,
+      "status": "completed",
+      "paidAt": "2026-06-16T11:02:00.000Z"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

@@ -12,9 +12,9 @@ const iamStore = useIamStore()
     <p>{{ t('dashboard.content') }}</p>
 
     <section v-if="iamStore.currentUser" class="user-card">
-      <p><strong>Email:</strong> {{ iamStore.currentUser.email }}</p>
-      <p><strong>Usuario:</strong> {{ iamStore.currentUser.username }}</p>
-      <p><strong>Rol:</strong> {{ iamStore.currentUser.role }}</p>
+      <p><strong>{{ t('dashboard.email') }}:</strong> {{ iamStore.currentUser.email }}</p>
+      <p><strong>{{ t('dashboard.username') }}:</strong> {{ iamStore.currentUser.username }}</p>
+      <p><strong>{{ t('dashboard.role') }}:</strong> {{ iamStore.currentUser.role }}</p>
     </section>
   </main>
 </template>

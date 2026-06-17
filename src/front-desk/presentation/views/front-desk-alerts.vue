@@ -1,353 +1,116 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { toI18nKey } from '../../../shared/application/locale-key.js'
+import useFrontDeskStore from '../../application/front-desk.store.js'
+import { formatDate, formatCompactRemainingTime, formatTime, getRemainingMilliseconds } from '../../../shared/domain/services/date-format.service.js'
 
-const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
-
+const { t } = useI18n()
+const frontDeskStore = useFrontDeskStore()
 const searchTerm = ref('')
 
-const alerts = ref([
-  {
-    id: 1,
-    room: '196',
-    guest: 'Figma Senit',
-    floor: 'Piso 3',
-    limitDate: '11/05/2026',
-    time: '10:00:00',
-    remainingTime: '00:23:02'
-  },
-  {
-    id: 2,
-    room: '421',
-    guest: 'Senit Lopez',
-    floor: 'Piso 2',
-    limitDate: '11/05/2026',
-    time: '10:50:20',
-    remainingTime: '00:01:24'
-  },
-  {
-    id: 3,
-    room: '123',
-    guest: 'Figma Paredes',
-    floor: 'Piso 1',
-    limitDate: '11/05/2026',
-    time: '12:30:10',
-    remainingTime: '00:13:22'
-  }
-])
-
-const filteredAlerts = computed(() => {
-  const term = searchTerm.value.toLowerCase()
-
-  return alerts.value.filter(alert =>
-      alert.guest.toLowerCase().includes(term) ||
-      alert.room.toLowerCase().includes(term) ||
-      alert.floor.toLowerCase().includes(term)
-  )
+const alertStays = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase()
+  return frontDeskStore.activeStaysWithDetails
+    .filter(stay => stay.status === 'endingSoon' || stay.status === 'overdue')
+    .filter(stay => !term || stay.guest.fullName.toLowerCase().includes(term) || stay.room?.number?.toLowerCase().includes(term))
+    .sort((a, b) => new Date(a.checkOutLimitAt) - new Date(b.checkOutLimitAt))
 })
 
-function viewDetail(alert) {
-  router.push({
-    name: 'front-desk-stay-details',
-    params: { id: alert.id }
-  })
+function remainingText(stay) {
+  return formatCompactRemainingTime(getRemainingMilliseconds(stay.checkOutLimitAt, frontDeskStore.now))
+}
+
+function checkoutStay(stay) {
+  router.push({ name: route.path.startsWith('/admin') ? 'admin-stay-checkout' : 'front-desk-stay-checkout', params: { id: stay.id } })
 }
 </script>
 
 <template>
-  <section class="alerts-page">
-    <header class="topbar">
-      <div class="search-box">
-        <input
-            type="text"
-            :placeholder="t('frontDesk.alerts.globalSearch')"
-        />
-        <i class="pi pi-search"></i>
+  <section class="page-shell alerts-page">
+    <section class="page-header">
+      <div>
+        <h1>{{ t('front-desk.alerts.title') }}</h1>
+        <p>{{ t('front-desk.alerts.subtitle') }}</p>
       </div>
-    </header>
-
-    <section class="title-section">
-      <h1>{{ t('frontDesk.alerts.title') }}</h1>
-      <p>{{ t('frontDesk.alerts.subtitle') }}</p>
     </section>
 
-    <section class="alerts-card">
-      <div class="alerts-header">
-        <h2>
-          {{ t('frontDesk.alerts.activeReservations') }}
-          ({{ filteredAlerts.length }})
-        </h2>
+    <section class="summary-grid compact-summary-grid slim-stat-grid">
+      <article class="summary-card orange"><span>{{ t('front-desk.alerts.ending-soon') }}</span><strong>{{ frontDeskStore.endingSoonStays.length }}</strong></article>
+      <article class="summary-card red"><span>{{ t('front-desk.alerts.overdue') }}</span><strong>{{ frontDeskStore.overdueStays.length }}</strong></article>
+      <article class="summary-card blue"><span>{{ t('front-desk.alerts.active-stays') }}</span><strong>{{ frontDeskStore.activeStaysWithDetails.length }}</strong></article>
+      <article class="summary-card green"><span>{{ t('front-desk.alerts.available-rooms') }}</span><strong>{{ frontDeskStore.availableRooms.length }}</strong></article>
+    </section>
 
-        <div class="name-search">
-          <label>{{ t('frontDesk.alerts.searchByName') }}:</label>
-
-          <div class="name-search-box">
-            <input v-model="searchTerm" type="text" />
-            <i class="pi pi-search"></i>
-          </div>
+    <section class="panel-card alerts-table-card">
+      <div class="panel-header alerts-panel-header">
+        <div>
+          <h2>{{ t('front-desk.alerts.active-rooms-with-alerts') }}</h2>
+          <p class="help-message">{{ t('front-desk.alerts.active-rooms-description') }}</p>
         </div>
+        <span>{{ t('front-desk.reservations.records', { count: alertStays.length }) }}</span>
       </div>
 
-      <div class="alerts-list">
-        <article
-            v-for="alert in filteredAlerts"
-            :key="alert.id"
-            class="alert-item"
-        >
-          <div class="room-title">
-            <h3>
-              {{ t('frontDesk.alerts.room') }} {{ alert.room }}
-            </h3>
-          </div>
+      <section class="toolbar-card alert-inner-toolbar">
+        <div class="compact-search-group alerts-search-group">
+          <label>{{ t('front-desk.alerts.search-by-room-or-guest') }}</label>
+          <form class="search-box alerts-search-box" @submit.prevent>
+            <input v-model="searchTerm" type="text" :placeholder="t('front-desk.alerts.search-placeholder-short')" />
+            <button type="submit" :aria-label="t('shared.actions.search')"><i class="pi pi-search"></i></button>
+          </form>
+        </div>
+      </section>
 
-          <div class="alert-data">
-            <div>
-              <span>{{ t('frontDesk.alerts.guest') }}:</span>
-              <strong>{{ alert.guest }}</strong>
-            </div>
-
-            <div>
-              <span>{{ t('frontDesk.alerts.location') }}:</span>
-              <strong>{{ alert.floor }}</strong>
-            </div>
-
-            <div>
-              <span>{{ t('frontDesk.alerts.limitDate') }}:</span>
-              <strong>{{ alert.limitDate }}</strong>
-            </div>
-
-            <div>
-              <span>{{ t('frontDesk.alerts.time') }}:</span>
-              <strong>{{ alert.time }}</strong>
-            </div>
-
-            <div>
-              <span>{{ t('frontDesk.alerts.remainingTime') }}:</span>
-              <strong class="remaining">{{ alert.remainingTime }}</strong>
-            </div>
-
-            <button class="detail-button" @click="viewDetail(alert)">
-              {{ t('frontDesk.alerts.viewDetail') }}
-            </button>
-          </div>
-        </article>
+      <div class="table-wrapper no-horizontal-scroll">
+        <table class="data-table compact-table alerts-data-table">
+          <thead>
+            <tr>
+              <th>{{ t('front-desk.common.room') }}</th>
+              <th>{{ t('front-desk.common.guest') }}</th>
+              <th>{{ t('front-desk.common.location') }}</th>
+              <th>{{ t('front-desk.alerts.limit-date') }}</th>
+              <th>{{ t('front-desk.common.time') }}</th>
+              <th>{{ t('front-desk.alerts.remaining-time') }}</th>
+              <th>{{ t('front-desk.alerts.status') }}</th>
+              <th>{{ t('front-desk.common.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="stay in alertStays" :key="stay.id">
+              <td><span class="room-badge">{{ stay.room?.number }}</span></td>
+              <td>{{ stay.guest.fullName }}</td>
+              <td>{{ t('front-desk.rooms.floor-with-number', { floor: stay.room?.floor }) }} · {{ stay.room?.type }}</td>
+              <td>{{ formatDate(stay.checkOutLimitAt) }}</td>
+              <td>{{ formatTime(stay.checkOutLimitAt) }}</td>
+              <td class="remaining-cell">{{ remainingText(stay) }}</td>
+              <td><span class="status-badge" :class="stay.status">{{ t('front-desk.stay-status.' + toI18nKey(stay.status)) }}</span></td>
+              <td class="actions"><button class="success-button table-action-button" type="button" @click="checkoutStay(stay)"><i class="pi pi-arrow-right"></i>{{ t('front-desk.stays.checkout-action') }}</button></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <div v-if="!filteredAlerts.length" class="empty-state">
-        <i class="pi pi-search"></i>
-        <h2>{{ t('frontDesk.alerts.noResults') }}</h2>
+      <div v-if="!alertStays.length" class="empty-state">
+        <i class="pi pi-check-circle"></i>
+        <h2>{{ t('front-desk.alerts.no-active-alerts') }}</h2>
+        <p>{{ t('front-desk.alerts.no-active-alerts-description') }}</p>
       </div>
     </section>
   </section>
 </template>
 
 <style scoped>
-.alerts-page {
-  min-height: 100vh;
-  padding: 2rem;
-  background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+.alerts-search-group {
+  flex: 1 1 620px;
 }
 
-.topbar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
+.alerts-search-box {
+  width: min(520px, 100%);
 }
 
-.search-box {
-  width: min(780px, 100%);
-  height: 46px;
-  background: #ffffff;
-  border: 1px solid #dbe3ef;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  padding: 0 1rem;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-}
-
-.search-box input,
-.name-search-box input {
+.alert-inner-toolbar {
   width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: #0f172a;
-  font-size: 1rem;
-}
-
-.search-box i,
-.name-search-box i {
-  color: #1e3a8a;
-}
-
-.title-section {
-  margin-bottom: 2rem;
-}
-
-.title-section h1 {
-  margin: 0;
-  color: #1e3a8a;
-  font-size: 2.4rem;
-  font-weight: 800;
-}
-
-.title-section p {
-  margin: 0.35rem 0 0;
-  color: #64748b;
-  font-size: 1.05rem;
-}
-
-.alerts-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 22px;
-  padding: 1.4rem;
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
-}
-
-.alerts-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.2rem;
-}
-
-.alerts-header h2 {
-  margin: 0;
-  color: #475569;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.name-search {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  color: #64748b;
-}
-
-.name-search-box {
-  width: 260px;
-  height: 42px;
-  background: #f8fafc;
-  border: 1px solid #dbe3ef;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  padding: 0 0.8rem;
-}
-
-.alerts-list {
-  display: grid;
-  gap: 1rem;
-}
-
-.alert-item {
-  border-radius: 18px;
-  padding: 1rem 1.2rem;
-  background: #f8fafc;
-  border: 1px solid #dbe3ef;
-  transition: 0.2s ease;
-}
-
-.alert-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
-}
-
-.room-title h3 {
-  margin: 0 0 0.8rem;
-  color: #0f172a;
-  font-size: 1.2rem;
-}
-
-.alert-data {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 0.9fr 1.2fr auto;
-  gap: 1rem;
-  align-items: center;
-}
-
-.alert-data div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.alert-data span {
-  color: #0f172a;
-  font-weight: 800;
-}
-
-.alert-data strong {
-  color: #475569;
-  font-weight: 500;
-}
-
-.remaining {
-  color: #dc2626 !important;
-  font-weight: 800 !important;
-}
-
-.detail-button {
-  min-width: 150px;
-  height: 46px;
-  border: none;
-  border-radius: 12px;
-  background: #475569;
-  color: #ffffff;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.detail-button:hover {
-  background: #334155;
-}
-
-.empty-state {
-  min-height: 220px;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  color: #64748b;
-}
-
-.empty-state i {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-@media (max-width: 1100px) {
-  .alert-data {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .detail-button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 760px) {
-  .alerts-page {
-    padding: 1rem;
-  }
-
-  .alerts-header,
-  .name-search {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .name-search-box {
-    width: 100%;
-  }
-
-  .alert-data {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

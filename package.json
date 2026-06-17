@@ -7,10 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "api": "npx json-server --watch server/db.json --port 3000",
+    "dev:full": "npm run api -- --host 0.0.0.0 & npm run dev"
   },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
+    "axios": "^1.18.0",
     "pinia": "^3.0.4",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",

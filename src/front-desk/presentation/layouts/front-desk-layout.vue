@@ -1,67 +1,37 @@
 <script setup>
+import { computed, ref } from 'vue'
+import useIamStore from '../../../iam/application/iam.store.js'
+import useFrontDeskStore from '../../application/front-desk.store.js'
+import { useI18n } from 'vue-i18n'
+import FrontDeskSidebar from '../components/front-desk-sidebar.vue'
+
+const iamStore = useIamStore()
+const frontDeskStore = useFrontDeskStore()
+const { t } = useI18n()
+const activeAlertCount = computed(() => frontDeskStore.endingSoonStays.length + frontDeskStore.overdueStays.length)
+const mobileSidebarOpen = ref(false)
+
+function toggleMobileSidebar() { mobileSidebarOpen.value = !mobileSidebarOpen.value }
+function closeMobileSidebar() { mobileSidebarOpen.value = false }
+function closeSidebarAfterNavigation(event) {
+  if (event.target.closest('a')) closeMobileSidebar()
+}
 </script>
 
 <template>
-  <main class="front-desk-layout">
-    <aside class="sidebar">
-      <h1>Senit</h1>
-
-      <nav>
-        <router-link to="/front-desk/dashboard">Panel de Control</router-link>
-        <router-link to="/front-desk/rooms">Habitaciones</router-link>
-        <router-link to="/front-desk/stays">Estadías</router-link>
-        <router-link to="/front-desk/check-in">Check-in</router-link>
-        <router-link to="/front-desk/reservations">Reservas</router-link>
-        <router-link to="/front-desk/alerts">Alertas</router-link>
-        <router-link to="/front-desk/settings">Configuración</router-link>
-      </nav>
-    </aside>
-
-    <section class="content">
+  <main class="app-shell" :class="{ 'sidebar-open': mobileSidebarOpen }">
+    <button class="mobile-sidebar-button" type="button" :aria-label="mobileSidebarOpen ? t('shared.navigation.close-menu') : t('shared.navigation.open-menu')" :aria-expanded="mobileSidebarOpen" @click.stop="toggleMobileSidebar">
+      <i :class="mobileSidebarOpen ? 'pi pi-times' : 'pi pi-bars'"></i>
+    </button>
+    <div v-if="mobileSidebarOpen" class="mobile-sidebar-backdrop" @click="closeMobileSidebar"></div>
+    <front-desk-sidebar
+      :is-admin="iamStore.isAdmin"
+      :notification-count="activeAlertCount"
+      class="mobile-sidebar-drawer"
+      @click="closeSidebarAfterNavigation"
+    />
+    <section class="app-content role-content">
       <router-view />
     </section>
   </main>
 </template>
-
-<style scoped>
-.front-desk-layout {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  background: #f8fafc;
-}
-
-.sidebar {
-  background: #ffffff;
-  border-right: 1px solid #e2e8f0;
-  padding: 2rem;
-}
-
-.sidebar h1 {
-  margin: 0 0 2rem;
-  color: #0f3a8a;
-  font-size: 2rem;
-}
-
-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-nav a {
-  padding: 0.9rem 1rem;
-  border-radius: 12px;
-  color: #334155;
-  text-decoration: none;
-}
-
-nav a.router-link-active {
-  background: #2563eb;
-  color: white;
-}
-
-.content {
-  padding: 2rem;
-}
-</style>
