@@ -74,7 +74,7 @@ function resetForm() {
   form.paymentMethod = 'cash'
 }
 
-function submitCheckIn() {
+async function submitCheckIn() {
   feedback.value = { type: '', message: '' }
   createdStay.value = null
   if (!validate()) {
@@ -82,7 +82,7 @@ function submitCheckIn() {
     return
   }
 
-  const result = guestStaysStore.createCheckIn(form)
+  const result = await guestStaysStore.createCheckIn(form)
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   if (result.ok) {
     createdStay.value = result.stay

@@ -1,5 +1,5 @@
 /**
- * @summary Reusable CRUD endpoint implementation for json-server or a real REST API.
+ * @summary Reusable CRUD endpoint implementation for the Senit REST API.
  */
 export class BaseEndpoint {
   /**

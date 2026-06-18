@@ -67,13 +67,13 @@ const filteredRooms = computed(() => {
 })
 
 function setRowFeedback(roomId, type, message) { rowFeedback[roomId] = { type, message } }
-function saveRoom() {
-  const result = operationsStore.createRoom(form)
+async function saveRoom() {
+  const result = await operationsStore.createRoom(form)
   creationFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   if (result.ok) Object.assign(form, { number: '', floor: 1, type: 'Standard', capacity: 2, pricePerHour: 20, status: 'available' })
 }
-function changeStatus(room, status) {
-  const result = operationsStore.updateRoomStatus(room.id, status)
+async function changeStatus(room, status) {
+  const result = await operationsStore.updateRoomStatus(room.id, status)
   setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
 }
 function startEdit(room) {
@@ -81,13 +81,13 @@ function startEdit(room) {
   Object.assign(editForm, { number: room.number, floor: Number(room.floor), type: room.type, capacity: Number(room.capacity), pricePerHour: Number(room.pricePerHour) })
 }
 function cancelEdit() { editingRoomId.value = null }
-function saveEdit(room) {
-  const result = operationsStore.updateRoom(room.id, editForm)
+async function saveEdit(room) {
+  const result = await operationsStore.updateRoom(room.id, editForm)
   setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
   if (result.ok) editingRoomId.value = null
 }
-function deleteRoom(room) {
-  const result = operationsStore.deleteRoom(room.id)
+async function deleteRoom(room) {
+  const result = await operationsStore.deleteRoom(room.id)
   setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
 }
 

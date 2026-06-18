@@ -54,8 +54,8 @@ function viewStay(room) {
   if (!room.stayId) return
   router.push({ name: route.path.startsWith('/admin') ? 'admin-stay-checkout' : 'front-desk-stay-checkout', params: { id: room.stayId } })
 }
-function markAvailable(room) {
-  const result = roomsStore.updateRoomStatus(room.id, 'available')
+async function markAvailable(room) {
+  const result = await roomsStore.updateRoomStatus(room.id, 'available')
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
 }
 

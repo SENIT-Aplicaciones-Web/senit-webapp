@@ -21,7 +21,7 @@
     "invalid-credentials": "Invalid credentials",
     "registered-successfully": "User registered successfully",
     "email-already-exists": "An account already exists with that email",
-    "api-unavailable": "Could not connect to the fake API. Check that json-server is running.",
+    "api-unavailable": "Could not connect to the Senit API. Check that the backend is running.",
     "validation-email": "Enter a valid email address.",
     "validation-username": "Enter a username.",
     "validation-password": "Password must have at least 6 characters.",
@@ -243,7 +243,9 @@
       "consumption-deleted": "Consumption deleted successfully.",
       "already-finished": "The stay is already finished.",
       "confirm-before-receipt": "Confirm payment before issuing the receipt.",
-      "receipt-finished": "Receipt issued and stay finished successfully."
+      "receipt-finished": "Receipt issued and stay finished successfully.",
+      "payment-error": "The payment could not be confirmed.",
+      "receipt-error": "The receipt could not be issued."
     },
     "alerts": {
       "title": "Stay alerts",
@@ -476,7 +478,8 @@
       "end-after-start": "The checkout date must be after the check-in date.",
       "overlapping-booking": "There is already an overlapping reservation or stay for this room.",
       "reservation-payment-error": "The reservation guarantee payment could not be calculated.",
-      "room-not-available": "The selected room is not available."
+      "room-not-available": "The selected room is not available.",
+      "duration-whole-hours": "Duration must be in whole hours."
     }
   },
   "admin": {
@@ -563,7 +566,8 @@
         "valid-capacity": "Enter a valid capacity.",
         "valid-price": "Enter a valid hourly price.",
         "delete-active-stay": "A room with an active stay cannot be deleted.",
-        "delete-confirmed-reservation": "A room with confirmed reservations cannot be deleted."
+        "delete-confirmed-reservation": "A room with confirmed reservations cannot be deleted.",
+        "valid-type": "Select a valid room type."
       },
       "status-updated": "Room status updated.",
       "created-successfully": "Room registered successfully.",
@@ -670,6 +674,7 @@
     },
     "pro-required": "Report exports are available on the Pro plan.",
     "export-ready": "History exported successfully.",
-    "payment-history-description": "Subscription payments registered for the hotel."
+    "payment-history-description": "Subscription payments registered for the hotel.",
+    "update-error": "The subscription could not be updated."
   }
 }

@@ -5,7 +5,7 @@ import { User } from '../domain/model/user.entity.js'
  */
 export class UserAssembler {
   /**
-   * @summary Converts a REST/local resource into a User entity.
+   * @summary Converts a REST resource into a User entity.
    * @param {object} resource User resource.
    * @returns {User}
    */
@@ -17,6 +17,7 @@ export class UserAssembler {
       email: resource.email,
       username: resource.username,
       role: resource.role,
+      status: resource.status,
       createdAt: resource.createdAt
     })
   }
@@ -32,7 +33,7 @@ export class UserAssembler {
   }
 
   /**
-   * @summary Converts a User entity into a safe REST/local resource.
+   * @summary Converts a User entity into a safe REST resource.
    * @param {User|object} user User entity.
    * @returns {object}
    */
@@ -44,6 +45,7 @@ export class UserAssembler {
       email: user.email,
       username: user.username,
       role: user.role,
+      status: user.status,
       createdAt: user.createdAt
     }
   }

@@ -43,8 +43,8 @@ function goToReservationForm() {
   router.push({ name: route.path.startsWith('/admin') ? 'admin-reservation-new' : 'front-desk-reservation-new' })
 }
 
-function cancelReservation(reservation) {
-  const result = reservationsStore.cancelReservation(reservation.id)
+async function cancelReservation(reservation) {
+  const result = await reservationsStore.cancelReservation(reservation.id)
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
 }
 

@@ -30,13 +30,13 @@ function goToCheckout() {
   router.push({ name: routeName('front-desk-stay-checkout', 'admin-stay-checkout'), params: { id: stay.value.id } })
 }
 
-function addConsumption() {
+async function addConsumption() {
   feedback.value = { type: '', message: '' }
   if (!canModifyConsumptions.value) {
     feedback.value = { type: 'error', message: t('front-desk.checkout.paid-consumption-locked') }
     return
   }
-  const result = guestStaysStore.addConsumption(stay.value.id, consumptionForm)
+  const result = await guestStaysStore.addConsumption(stay.value.id, consumptionForm)
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   if (result.ok) {
     consumptionForm.description = ''

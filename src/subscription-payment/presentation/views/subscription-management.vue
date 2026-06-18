@@ -23,8 +23,8 @@ watch(currentPlan, plan => {
   selectedPlan.value = plan.name
 })
 
-function savePlan() {
-  subscriptionsStore.updateSubscription(selectedPlan.value)
+async function savePlan() {
+  await subscriptionsStore.updateSubscription(selectedPlan.value)
 }
 
 function exportPaymentHistory() {

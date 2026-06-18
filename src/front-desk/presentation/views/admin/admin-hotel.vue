@@ -15,8 +15,8 @@ watchEffect(() => {
   Object.assign(form, operationsStore.activeHotel)
 })
 
-function saveHotel() {
-  const result = operationsStore.updateHotel({ name: form.name, ruc: form.ruc, address: form.address, phone: form.phone, email: form.email })
+async function saveHotel() {
+  const result = await operationsStore.updateHotel({ name: form.name, ruc: form.ruc, address: form.address, phone: form.phone, email: form.email })
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
 }
 

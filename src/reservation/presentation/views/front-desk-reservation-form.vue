@@ -33,7 +33,8 @@ const reservationHours = computed(() => {
   const start = new Date(startAt.value).getTime()
   const end = new Date(endAt.value).getTime()
   if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return 0
-  return Math.ceil((end - start) / (60 * 60 * 1000))
+  const hours = (end - start) / (60 * 60 * 1000)
+  return Number.isInteger(hours) ? hours : 0
 })
 const reservationAmount = computed(() => Number((reservationHours.value * Number(selectedRoom.value?.pricePerHour ?? 0)).toFixed(2)))
 
@@ -55,13 +56,13 @@ function validate() {
   }
   return valid
 }
-function submitReservation() {
+async function submitReservation() {
   feedback.value = { type: '', message: '' }
   if (!validate()) {
     feedback.value = { type: 'error', message: t('front-desk.check-in.validation.fix-fields') }
     return
   }
-  const result = reservationsStore.createReservation({ ...form, startAt: startAt.value, endAt: endAt.value })
+  const result = await reservationsStore.createReservation({ ...form, startAt: startAt.value, endAt: endAt.value })
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   if (result.ok) setTimeout(() => router.push({ name: route.path.startsWith('/admin') ? 'admin-reservations' : 'front-desk-reservations' }), 700)
 }

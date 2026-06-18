@@ -11,7 +11,7 @@ export class UsersApi extends BaseEndpoint {
   }
 
   /**
-   * @summary Gets all users from the fake API.
+   * @summary Gets all users from the Senit API.
    * @returns {Promise<User[]>}
    */
   getAllUsers() {

@@ -1,10 +1,13 @@
 /**
- * Represents a payment registered for a guest stay inside the Subscription and Payment Management bounded context.
+ * Represents a payment registered for a guest stay or reservation.
  */
 export class Payment {
-  constructor({ id, stayId, amount, method, status, paidAt }) {
-    this.id = Number(id)
-    this.stayId = Number(stayId)
+  constructor({ id, hotelId, stayId, guestStayId, reservationId, amount, method, status, paidAt }) {
+    this.id = id
+    this.hotelId = hotelId
+    this.stayId = stayId ?? guestStayId ?? null
+    this.guestStayId = guestStayId ?? stayId ?? null
+    this.reservationId = reservationId ?? null
     this.amount = Number(amount)
     this.method = method
     this.status = status

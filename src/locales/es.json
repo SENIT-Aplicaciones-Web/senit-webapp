@@ -21,7 +21,7 @@
     "invalid-credentials": "Credenciales inválidas",
     "registered-successfully": "Usuario registrado correctamente",
     "email-already-exists": "Ya existe una cuenta con ese correo",
-    "api-unavailable": "No se pudo conectar con el fake API. Verifica que json-server esté ejecutándose.",
+    "api-unavailable": "No se pudo conectar con la API de Senit. Verifica que el backend esté ejecutándose.",
     "validation-email": "Ingrese un correo válido.",
     "validation-username": "Ingrese un nombre de usuario.",
     "validation-password": "La contraseña debe tener al menos 6 caracteres.",
@@ -243,7 +243,9 @@
       "consumption-deleted": "Consumo eliminado correctamente.",
       "already-finished": "La estadía ya fue finalizada.",
       "confirm-before-receipt": "Confirme el pago antes de emitir el comprobante.",
-      "receipt-finished": "Comprobante emitido y estadía finalizada correctamente."
+      "receipt-finished": "Comprobante emitido y estadía finalizada correctamente.",
+      "payment-error": "No se pudo confirmar el pago.",
+      "receipt-error": "No se pudo emitir el comprobante."
     },
     "alerts": {
       "title": "Alertas de estadía",
@@ -476,7 +478,8 @@
       "end-after-start": "La fecha de salida debe ser posterior a la fecha de ingreso.",
       "overlapping-booking": "Ya existe una reserva o estadía superpuesta para esta habitación.",
       "reservation-payment-error": "No se pudo calcular el pago de garantía.",
-      "room-not-available": "La habitación seleccionada no está disponible."
+      "room-not-available": "La habitación seleccionada no está disponible.",
+      "duration-whole-hours": "La duración debe ser en horas enteras."
     }
   },
   "admin": {
@@ -563,7 +566,8 @@
         "valid-capacity": "Ingrese una capacidad válida.",
         "valid-price": "Ingrese un precio por hora válido.",
         "delete-active-stay": "No se puede eliminar una habitación con estadía activa.",
-        "delete-confirmed-reservation": "No se puede eliminar una habitación con reservas confirmadas."
+        "delete-confirmed-reservation": "No se puede eliminar una habitación con reservas confirmadas.",
+        "valid-type": "Seleccione un tipo de habitación válido."
       },
       "status-updated": "Estado de habitación actualizado.",
       "created-successfully": "Habitación registrada correctamente.",
@@ -670,6 +674,7 @@
     },
     "pro-required": "La exportación de reportes está disponible en el plan Pro.",
     "export-ready": "Historial exportado correctamente.",
-    "payment-history-description": "Pagos de suscripción registrados para el hotel."
+    "payment-history-description": "Pagos de suscripción registrados para el hotel.",
+    "update-error": "No se pudo actualizar la suscripción."
   }
 }

@@ -30,13 +30,13 @@ function goBack() {
 }
 function resetConsumptionForm() { Object.assign(consumptionForm, { description: '', quantity: 1, unitPrice: 0 }) }
 
-function addConsumption() {
+async function addConsumption() {
   consumptionFeedback.value = { type: '', message: '' }
   if (!canModifyConsumptions.value) {
     consumptionFeedback.value = { type: 'error', message: t('front-desk.checkout.paid-consumption-locked') }
     return
   }
-  const result = paymentsStore.addConsumption(route.params.id, consumptionForm)
+  const result = await paymentsStore.addConsumption(route.params.id, consumptionForm)
   consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   if (!result.ok) return
   resetConsumptionForm()
@@ -57,27 +57,27 @@ function cancelConsumptionEdit() {
   editingConsumptionId.value = null
 }
 
-function saveConsumptionEdit(consumption) {
-  const result = paymentsStore.updateConsumption(consumption.id, consumptionEditForm)
+async function saveConsumptionEdit(consumption) {
+  const result = await paymentsStore.updateConsumption(consumption.id, consumptionEditForm)
   consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   if (result.ok) editingConsumptionId.value = null
 }
 
-function removeConsumption(consumption) {
+async function removeConsumption(consumption) {
   if (!canModifyConsumptions.value) return
-  const result = paymentsStore.deleteConsumption(consumption.id)
+  const result = await paymentsStore.deleteConsumption(consumption.id)
   consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
 }
 
-function confirmPayment() {
+async function confirmPayment() {
   feedback.value = { type: '', message: '' }
-  const result = paymentsStore.confirmPayment(route.params.id, paymentMethod.value)
+  const result = await paymentsStore.confirmPayment(route.params.id, paymentMethod.value)
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
 }
 
-function issueReceipt() {
+async function issueReceipt() {
   feedback.value = { type: '', message: '' }
-  const result = paymentsStore.issueInvoiceAndFinishStay(route.params.id)
+  const result = await paymentsStore.issueInvoiceAndFinishStay(route.params.id)
   feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   if (!result.ok) return
 

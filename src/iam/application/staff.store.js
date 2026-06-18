@@ -15,7 +15,7 @@ const useStaffStore = defineStore('staff', () => {
 
     const createdUser = await AuthenticationApi.createUser({
       ...staffUserData,
-      hotelId: Number(activeHotel.value?.id ?? 1)
+      hotelId: activeHotel.value?.id ?? ''
     })
     if (!createdUser) return { ok: false, message: 'admin.staff.validation.duplicate-email' }
     return { ok: true, message: 'admin.staff.created-successfully', user: createdUser }
@@ -28,7 +28,7 @@ const useStaffStore = defineStore('staff', () => {
   }
 
   async function deleteStaffUser(userId) {
-    const deleted = await AuthenticationApi.deleteUser(userId)
+    const deleted = await AuthenticationApi.deleteUser(userId, activeHotel.value?.id)
     if (!deleted) return { ok: false, message: 'admin.staff.validation.delete-error' }
     return { ok: true, message: 'admin.staff.deleted-successfully' }
   }
