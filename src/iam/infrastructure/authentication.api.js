@@ -32,8 +32,13 @@ export class AuthenticationApi {
     return stored ? JSON.parse(stored) : null
   }
 
-  static async getUsers() {
-    const response = await usersEndpoint.getAll()
+  static async getUsers(hotelId = null) {
+    const currentUser = this.getCurrentUser()
+    const targetHotelId = hotelId ?? currentUser?.hotelId ?? null
+    const endpointPath = targetHotelId
+      ? `${usersEndpoint.endpointPath}?hotelId=${encodeURIComponent(targetHotelId)}`
+      : usersEndpoint.endpointPath
+    const response = await api.http.get(endpointPath)
     return UserAssembler.toEntitiesFromResponse(response)
   }
 

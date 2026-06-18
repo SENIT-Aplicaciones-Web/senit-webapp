@@ -34,7 +34,7 @@ const useStaffStore = defineStore('staff', () => {
   }
 
   async function fetchUsers() {
-    return AuthenticationApi.getUsers()
+    return AuthenticationApi.getUsers(activeHotel.value?.id)
   }
 
   return {

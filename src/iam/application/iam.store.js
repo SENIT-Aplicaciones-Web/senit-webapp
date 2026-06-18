@@ -13,7 +13,7 @@ const useIamStore = defineStore('iam', () => {
     const isFrontDesk = computed(() => currentUser.value?.role === 'FRONT_DESK')
 
     async function loadUsers() {
-        users.value = await AuthenticationApi.getUsers()
+        users.value = await AuthenticationApi.getUsers(currentUser.value?.hotelId)
         return users.value
     }
 
@@ -58,7 +58,7 @@ const useIamStore = defineStore('iam', () => {
 
     async function refreshUsers() {
         try {
-            users.value = await AuthenticationApi.getUsers()
+            users.value = await AuthenticationApi.getUsers(currentUser.value?.hotelId)
         } catch (error) {
             users.value = []
         }
@@ -90,7 +90,9 @@ const useIamStore = defineStore('iam', () => {
         AuthenticationApi.signOut()
     }
 
-    refreshUsers()
+    if (currentUser.value?.hotelId) {
+        refreshUsers()
+    }
 
     return {
         users,

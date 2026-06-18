@@ -24,12 +24,17 @@ const roleFilterOptions = computed(() => [
   ...roleOptions.value
 ])
 
+function sameId(firstValue, secondValue) {
+  return String(firstValue ?? '') === String(secondValue ?? '')
+}
+
 const staff = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
   return iamStore.users.filter(user => {
+    const matchesHotel = !operationsStore.activeHotel?.id || sameId(user.hotelId, operationsStore.activeHotel.id)
     const matchesText = !term || user.fullName?.toLowerCase().includes(term) || user.email?.toLowerCase().includes(term) || user.username?.toLowerCase().includes(term)
     const matchesRole = roleFilter.value === 'all' || user.role === roleFilter.value
-    return matchesText && matchesRole
+    return matchesHotel && matchesText && matchesRole
   })
 })
 
