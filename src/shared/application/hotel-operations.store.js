@@ -237,19 +237,22 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
 
   async function loadFromApi() {
     try {
+      const currentHotelId = iamStore.currentUser?.hotelId
+      const hotelParams = currentHotelId ? { hotelId: currentHotelId } : {}
+
       const responses = await Promise.all([
         hotelsEndpoint.getAll(),
-        roomsEndpoint.getAll(),
-        reservationsEndpoint.getAll(),
-        guestsEndpoint.getAll(),
-        guestStaysEndpoint.getAll(),
-        consumptionsEndpoint.getAll(),
-        paymentsEndpoint.getAll(),
-        invoicesEndpoint.getAll(),
-        cleaningTasksEndpoint.getAll(),
-        notificationsEndpoint.getAll(),
-        subscriptionsEndpoint.getAll().catch(() => ({ data: [] })),
-        subscriptionPaymentsEndpoint.getAll().catch(() => ({ data: [] }))
+        roomsEndpoint.getAll(hotelParams),
+        reservationsEndpoint.getAll(hotelParams),
+        guestsEndpoint.getAll(hotelParams),
+        guestStaysEndpoint.getAll(hotelParams),
+        consumptionsEndpoint.getAll(hotelParams),
+        paymentsEndpoint.getAll(hotelParams),
+        invoicesEndpoint.getAll(hotelParams),
+        cleaningTasksEndpoint.getAll(hotelParams),
+        notificationsEndpoint.getAll(hotelParams),
+        subscriptionsEndpoint.getAll(hotelParams).catch(() => ({ data: [] })),
+        subscriptionPaymentsEndpoint.getAll(hotelParams).catch(() => ({ data: [] }))
       ])
 
       hotels.value = responses[0].data ?? []

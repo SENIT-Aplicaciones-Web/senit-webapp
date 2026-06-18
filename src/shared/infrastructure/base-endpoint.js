@@ -14,10 +14,11 @@ export class BaseEndpoint {
 
   /**
    * @summary Executes GET of all resources.
+   * @param {object} params Optional query parameters.
    * @returns {Promise<import('axios').AxiosResponse>}
    */
-  getAll() {
-    return this.http.get(this.endpointPath)
+  getAll(params = {}) {
+    return this.http.get(this.endpointPath, { params })
   }
 
   /**
