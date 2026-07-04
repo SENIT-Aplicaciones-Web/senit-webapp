@@ -6,6 +6,7 @@
     "admin-name": "Senit",
     "default-hotel": "Senit Hotel"
   },
+  "credentials.demo": "Test credentials:",
   "auth": {
     "sign-in-title": "Sign in",
     "sign-in-subtitle": "Enter your data to continue",
