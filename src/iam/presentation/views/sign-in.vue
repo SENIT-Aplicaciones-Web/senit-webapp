@@ -44,7 +44,7 @@ function goToSignUp() {
       <div class="brand-content">
         <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
         <p class="brand-tagline">{{ t('brand.tagline') }}</p><br>
-        
+
         <h2>{{t('credentials.demo')}}</h2>
         <h2>admin@admin.com / 123456</h2>
         <h2>recepcion@recepcion.com / 12345</h2>
@@ -106,6 +106,12 @@ function goToSignUp() {
 .brand-section {
   display: flex;
   justify-content: center;
+}
+
+.brand-section h2 {
+  color: rgb(155, 155, 163);
+  margin-block-start: 0.2em;
+  margin-block-end: 0.2em;
 }
 
 .brand-content {
