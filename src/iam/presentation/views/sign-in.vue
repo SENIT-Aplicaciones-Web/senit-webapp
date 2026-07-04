@@ -45,9 +45,9 @@ function goToSignUp() {
         <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
         <p class="brand-tagline">{{ t('brand.tagline') }}</p><br>
         
-        <p>{{t('credentials.demo')}}</p><br>
-        <p>admin@admin.com / 123456</p>
-        <p>recepcion@recepcion.com / 12345</p>
+        <p class="brand-tagline">{{t('credentials.demo')}}</p>
+        <p class="brand-tagline">admin@admin.com / 123456</p>
+        <p class="brand-tagline">recepcion@recepcion.com / 12345</p>
       </div>
     </section>
 
