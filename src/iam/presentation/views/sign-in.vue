@@ -43,7 +43,11 @@ function goToSignUp() {
     <section class="brand-section">
       <div class="brand-content">
         <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
-        <p class="brand-tagline">{{ t('brand.tagline') }}</p>
+        <p class="brand-tagline">{{ t('brand.tagline') }}</p><br>
+        
+        <p>{{t('credentials.demo')}}</p><br>
+        <p>admin@admin.com / 123456</p>
+        <p>recepcion@recepcion.com / 12345</p>
       </div>
     </section>
 
@@ -77,6 +81,9 @@ function goToSignUp() {
             <pv-button :label="t('auth.sign-in')" type="submit" class="auth-button" />
             <pv-button :label="t('auth.sign-up')" type="button" class="auth-button" @click="goToSignUp" />
           </div>
+
+          
+          
         </form>
       </div>
     </section>
