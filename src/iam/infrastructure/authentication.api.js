@@ -1,5 +1,6 @@
 import { BaseApi } from '../../shared/infrastructure/base-api.js'
 import { BaseEndpoint } from '../../shared/infrastructure/base-endpoint.js'
+import { hasApiStatus } from '../../shared/infrastructure/api-error-message.js'
 import { UserAssembler } from './user.assembler.js'
 
 const CURRENT_USER_KEY = 'senit-webapp-current-user'
@@ -20,10 +21,6 @@ function sameId(firstValue, secondValue) {
 function saveCurrentUser(currentUser) {
   localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser))
   localStorage.setItem('senit-webapp-last-access', new Date().toISOString())
-}
-
-function getErrorStatus(error) {
-  return error?.response?.status ?? 0
 }
 
 export class AuthenticationApi {
@@ -52,7 +49,7 @@ export class AuthenticationApi {
       saveCurrentUser(currentUser)
       return currentUser
     } catch (error) {
-      if ([401, 403, 404].includes(getErrorStatus(error))) return null
+      if (hasApiStatus(error, [401, 403, 404])) return null
       throw error
     }
   }
@@ -66,7 +63,7 @@ export class AuthenticationApi {
       })
       return true
     } catch (error) {
-      if ([400, 404].includes(getErrorStatus(error))) return false
+      if (hasApiStatus(error, [404])) return false
       throw error
     }
   }
@@ -82,7 +79,7 @@ export class AuthenticationApi {
       saveCurrentUser(currentUser)
       return currentUser
     } catch (error) {
-      if (getErrorStatus(error) === 409) return null
+      if (hasApiStatus(error, [409])) return null
       throw error
     }
   }
@@ -100,7 +97,7 @@ export class AuthenticationApi {
       })
       return UserAssembler.toEntity(response.data)
     } catch (error) {
-      if (getErrorStatus(error) === 409) return null
+      if (hasApiStatus(error, [409])) return null
       throw error
     }
   }
@@ -128,7 +125,7 @@ export class AuthenticationApi {
 
       return updatedUser
     } catch (error) {
-      if ([404, 409].includes(getErrorStatus(error))) return null
+      if (hasApiStatus(error, [404, 409])) return null
       throw error
     }
   }

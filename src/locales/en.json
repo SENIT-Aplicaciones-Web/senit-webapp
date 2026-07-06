@@ -37,7 +37,8 @@
     "reset-password": "Update password",
     "passwords-do-not-match": "Passwords do not match.",
     "password-reset-successfully": "Password updated successfully. Sign in with your new password.",
-    "recovery-user-not-found": "No account was found with that email or the password is invalid."
+    "recovery-user-not-found": "No account was found with that email or the password is invalid.",
+    "validation-username-format": "Username can only contain letters, numbers and underscore."
   },
   "dashboard": {
     "title": "Main dashboard",
@@ -615,7 +616,8 @@
         "duplicate-email": "A user with that email already exists.",
         "update-error": "User could not be updated. Check that the email is not duplicated.",
         "delete-error": "The selected user could not be deleted.",
-        "use-iam-context": "Use the IAM context to register users."
+        "use-iam-context": "Use the IAM context to register users.",
+        "username-format": "Username can only contain letters, numbers and underscore."
       },
       "created-successfully": "Staff user registered successfully.",
       "updated-successfully": "User updated successfully.",

@@ -17,10 +17,12 @@ const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const submitted = ref(false)
+const usernamePattern = /^[A-Za-z0-9_]+$/
 const formErrors = computed(() => {
   const errors = []
   if (!email.value.trim() || !email.value.includes('@')) errors.push('auth.validation-email')
   if (!username.value.trim()) errors.push('auth.validation-username')
+  else if (!usernamePattern.test(username.value.trim())) errors.push('auth.validation-username-format')
   if (!password.value || password.value.length < 6) errors.push('auth.validation-password')
   return errors
 })

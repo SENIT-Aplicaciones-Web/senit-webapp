@@ -37,7 +37,8 @@
     "reset-password": "Actualizar contraseña",
     "passwords-do-not-match": "Las contraseñas no coinciden.",
     "password-reset-successfully": "Contraseña actualizada correctamente. Inicia sesión con tu nueva contraseña.",
-    "recovery-user-not-found": "No se encontró una cuenta con ese correo o la contraseña no es válida."
+    "recovery-user-not-found": "No se encontró una cuenta con ese correo o la contraseña no es válida.",
+    "validation-username-format": "El nombre de usuario solo puede contener letras, números y guion bajo."
   },
   "dashboard": {
     "title": "Panel principal",
@@ -615,7 +616,8 @@
         "duplicate-email": "Ya existe un usuario con ese correo.",
         "update-error": "No se pudo actualizar el usuario. Revise que el correo no esté duplicado.",
         "delete-error": "No se pudo eliminar el usuario seleccionado.",
-        "use-iam-context": "Use el contexto de IAM para registrar usuarios."
+        "use-iam-context": "Use el contexto de IAM para registrar usuarios.",
+        "username-format": "El nombre de usuario solo puede contener letras, números y guion bajo."
       },
       "created-successfully": "Usuario de personal registrado correctamente.",
       "updated-successfully": "Usuario actualizado correctamente.",

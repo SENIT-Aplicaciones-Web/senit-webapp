@@ -2,6 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { BaseApi } from '../infrastructure/base-api.js'
 import { BaseEndpoint } from '../infrastructure/base-endpoint.js'
+import { getApiErrorMessage } from '../infrastructure/api-error-message.js'
 import { addHours, formatDateTime, getRemainingMilliseconds, isSameDay } from '../domain/services/date-format.service.js'
 import useIamStore from '../../iam/application/iam.store.js'
 
@@ -18,7 +19,7 @@ function sameId(firstValue, secondValue) {
 }
 
 function getErrorMessage(error, fallback) {
-  return error?.response?.data?.detail || error?.response?.data?.title || fallback
+  return getApiErrorMessage(error, fallback)
 }
 
 function getReservationRuntimeStatus(reservation, referenceDate = new Date()) {

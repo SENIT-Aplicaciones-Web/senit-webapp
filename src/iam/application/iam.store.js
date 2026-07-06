@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { AuthenticationApi } from '../infrastructure/authentication.api.js'
+import { getApiErrorMessage } from '../../shared/infrastructure/api-error-message.js'
 
 const useIamStore = defineStore('iam', () => {
     const users = ref([])
@@ -31,7 +32,7 @@ const useIamStore = defineStore('iam', () => {
             await loadUsers()
             return true
         } catch (error) {
-            errors.value.push(new Error('auth.api-unavailable'))
+            errors.value.push(new Error(getApiErrorMessage(error, 'auth.api-unavailable')))
             return false
         }
     }
@@ -51,7 +52,7 @@ const useIamStore = defineStore('iam', () => {
             successMessage.value = 'auth.registered-successfully'
             return true
         } catch (error) {
-            errors.value.push(new Error('auth.api-unavailable'))
+            errors.value.push(new Error(getApiErrorMessage(error, 'auth.api-unavailable')))
             return false
         }
     }
@@ -69,7 +70,7 @@ const useIamStore = defineStore('iam', () => {
             successMessage.value = 'auth.password-reset-successfully'
             return true
         } catch (error) {
-            errors.value.push(new Error('auth.api-unavailable'))
+            errors.value.push(new Error(getApiErrorMessage(error, 'auth.api-unavailable')))
             return false
         }
     }
@@ -92,7 +93,7 @@ const useIamStore = defineStore('iam', () => {
             successMessage.value = 'front-desk.settings.password-updated'
             return true
         } catch (error) {
-            errors.value.push(new Error('front-desk.settings.password-update-error'))
+            errors.value.push(new Error(getApiErrorMessage(error, 'front-desk.settings.password-update-error')))
             return false
         }
     }
