@@ -25,8 +25,14 @@ function getErrorMessage(error, fallback) {
 function getReservationRuntimeStatus(reservation, referenceDate = new Date()) {
   if (!reservation) return 'unknown'
   if (reservation.status === 'cancelled' || reservation.status === 'completed') return reservation.status
+
+  const startTime = new Date(reservation.startAt).getTime()
   const endTime = new Date(reservation.endAt).getTime()
-  if (!Number.isNaN(endTime) && endTime < referenceDate.getTime()) return 'completed'
+  const currentTime = referenceDate.getTime()
+
+  if (!Number.isNaN(endTime) && endTime < currentTime) return 'completed'
+  if (!Number.isNaN(startTime) && !Number.isNaN(endTime) && startTime <= currentTime && currentTime < endTime) return 'readyForCheckIn'
+
   return reservation.status ?? 'confirmed'
 }
 
@@ -187,7 +193,8 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
         ...reservation,
         runtimeStatus,
         room: getRoomById(reservation.roomId),
-        statusLabel: getReservationStatusLabel(runtimeStatus)
+        statusLabel: getReservationStatusLabel(runtimeStatus),
+        canStartStay: runtimeStatus === 'readyForCheckIn'
       }
     })
   )
@@ -377,6 +384,10 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     return payments.value.find(payment => sameId(payment.guestStayId, stayId) && isConfirmedPayment(payment)) ?? null
   }
 
+  function getPaymentForReservation(reservationId) {
+    return payments.value.find(payment => sameId(payment.reservationId, reservationId) && isConfirmedPayment(payment)) ?? null
+  }
+
   function getInvoiceForStay(stayId) {
     const payment = getPaymentForStay(stayId)
     if (!payment) return null
@@ -545,7 +556,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
   function getAvailableRoomsForCheckIn(hours) {
     const stayHours = Number(hours)
     if (!Number.isInteger(stayHours) || stayHours < 1 || stayHours > 168) return []
-    return availableRooms.value.filter(room => validateCheckInAvailability({ roomId: room.id, hours: stayHours }).valid)
+    return availableRooms.value
   }
 
   async function sendNotification({ title, message, type = 'info' }) {
@@ -655,6 +666,93 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
       return { ok: true, message: 'front-desk.reservations.cancelled-successfully' }
     } catch (error) {
       return { ok: false, message: getErrorMessage(error, 'front-desk.reservations.not-found') }
+    }
+  }
+
+  async function startReservationStay(reservationId) {
+    const reservation = reservations.value.find(item => sameId(item.id, reservationId))
+    if (!reservation) return { ok: false, message: 'front-desk.reservations.not-found' }
+
+    const runtimeStatus = getReservationRuntimeStatus(reservation, now.value)
+    if (runtimeStatus !== 'readyForCheckIn') return { ok: false, message: 'front-desk.reservations.not-ready-for-check-in' }
+
+    const room = getRoomById(reservation.roomId)
+    if (!room) return { ok: false, message: 'front-desk.validation.valid-room' }
+    if (room.status !== 'available') return { ok: false, message: 'front-desk.validation.room-not-available' }
+
+    const originalStatus = reservation.status
+    let createdGuest = null
+    let createdStay = null
+
+    try {
+      const completedReservationResponse = await reservationsEndpoint.update(reservation.id, {
+        ...reservation,
+        status: 'completed'
+      })
+      Object.assign(reservation, normalizeReservation(completedReservationResponse.data))
+
+      const guestResponse = await guestsEndpoint.create({
+        fullName: reservation.guestName,
+        dni: reservation.dni,
+        phone: reservation.phone,
+        email: reservation.email
+      })
+      createdGuest = guestResponse.data
+      guests.value.push(createdGuest)
+
+      const stayResponse = await guestStaysEndpoint.create({
+        hotelId: activeHotel.value?.id ?? '',
+        roomId: reservation.roomId,
+        guestId: createdGuest.id,
+        guestName: createdGuest.fullName,
+        startAt: reservation.startAt,
+        expectedEndAt: reservation.endAt,
+        actualEndAt: null,
+        status: 'active',
+        baseAmount: money(reservation.reservationAmount),
+        additionalAmount: 0,
+        prepaidAmount: money(reservation.prepaidAmount),
+        totalAmount: money(reservation.reservationAmount),
+        paymentStatus: reservation.paymentStatus === 'paid' ? 'paid' : 'pending'
+      })
+      createdStay = normalizeGuestStay({ ...stayResponse.data, guest: createdGuest })
+      guestStays.value.push(createdStay)
+      room.status = 'occupied'
+
+      const reservationPayment = getPaymentForReservation(reservation.id)
+      if (reservationPayment) {
+        const paymentResponse = await paymentsEndpoint.update(reservationPayment.id, {
+          hotelId: reservationPayment.hotelId ?? activeHotel.value?.id ?? '',
+          guestStayId: createdStay.id,
+          reservationId: reservation.id,
+          amount: money(reservationPayment.amount),
+          method: reservationPayment.method ?? reservation.paymentMethod ?? 'cash',
+          status: 'paid',
+          paidAt: reservationPayment.paidAt ?? reservation.paidAt ?? new Date().toISOString()
+        })
+        Object.assign(reservationPayment, normalizePayment(paymentResponse.data))
+      }
+
+      await sendNotification({
+        title: 'Estadía iniciada desde reserva',
+        message: `${reservation.guestName} inició estadía en la habitación ${room.number}.`,
+        type: 'success'
+      })
+
+      return { ok: true, message: 'front-desk.reservations.check-in-created', stay: decorateStay(createdStay) }
+    } catch (error) {
+      if (createdStay) guestStays.value = guestStays.value.filter(stay => !sameId(stay.id, createdStay.id))
+      if (createdGuest) guests.value = guests.value.filter(guest => !sameId(guest.id, createdGuest.id))
+      try {
+        const revertedResponse = await reservationsEndpoint.update(reservation.id, {
+          ...reservation,
+          status: originalStatus
+        })
+        Object.assign(reservation, normalizeReservation(revertedResponse.data))
+      } catch {
+        reservation.status = originalStatus
+      }
+      return { ok: false, message: getErrorMessage(error, 'front-desk.validation.overlapping-booking') }
     }
   }
 
@@ -1033,6 +1131,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
   function getReservationStatusLabel(status) {
     return {
       confirmed: 'Confirmada',
+      readyForCheckIn: 'Lista para check-in',
       cancelled: 'Cancelada',
       completed: 'Finalizada'
     }[status] ?? status
@@ -1081,6 +1180,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     getAvailableRoomsForCheckIn,
     createReservation,
     cancelReservation,
+    startReservationStay,
     createCheckIn,
     addConsumption,
     updateConsumption,

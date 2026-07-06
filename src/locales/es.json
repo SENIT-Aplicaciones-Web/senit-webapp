@@ -349,7 +349,10 @@
       "created-successfully": "Reserva creada correctamente.",
       "not-found": "No se encontró la reserva.",
       "already-cancelled": "La reserva ya estaba cancelada.",
-      "cancelled-successfully": "Reserva cancelada correctamente."
+      "cancelled-successfully": "Reserva cancelada correctamente.",
+      "start-stay": "Iniciar estadía",
+      "not-ready-for-check-in": "La reserva solo puede iniciar estadía dentro de su horario programado.",
+      "check-in-created": "Estadía iniciada desde la reserva correctamente."
     },
     "reservation-form": {
       "title": "Nueva reserva",
@@ -481,7 +484,8 @@
       "confirmed": "Confirmada",
       "cancelled": "Cancelada",
       "completed": "Finalizada",
-      "pending": "Pendiente"
+      "pending": "Pendiente",
+      "ready-for-check-in": "Lista para check-in"
     },
     "validation": {
       "valid-room": "Seleccione una habitación válida.",

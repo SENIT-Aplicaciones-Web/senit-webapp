@@ -14,6 +14,7 @@ const reservationsStore = useReservationsStore()
 const guestSearch = ref('')
 const feedback = ref({ type: '', message: '' })
 const cancellingReservationId = ref(null)
+const startingReservationId = ref(null)
 
 const filteredReservations = computed(() => {
   const term = guestSearch.value.trim().toLowerCase()
@@ -52,6 +53,20 @@ async function cancelReservation(reservation) {
     feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
   } finally {
     cancellingReservationId.value = null
+  }
+}
+
+async function startReservationStay(reservation) {
+  if (startingReservationId.value) return
+  startingReservationId.value = reservation.id
+  try {
+    const result = await reservationsStore.startReservationStay(reservation.id)
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (result.ok && result.stay?.id) {
+      router.push({ name: route.path.startsWith('/admin') ? 'admin-stay-checkout' : 'front-desk-stay-checkout', params: { id: result.stay.id } })
+    }
+  } finally {
+    startingReservationId.value = null
   }
 }
 
@@ -116,7 +131,23 @@ function resolveFeedbackMessage(message) {
               <td>{{ formatDate(reservation.endAt) }}</td>
               <td>{{ formatTime(reservation.endAt) }}</td>
               <td><span class="status-badge" :class="reservation.runtimeStatus">{{ t('front-desk.reservation-status.' + toI18nKey(reservation.runtimeStatus)) }}</span></td>
-              <td class="actions"><button class="danger-ghost-button" type="button" :disabled="reservation.runtimeStatus !== 'confirmed' || cancellingReservationId === reservation.id" @click="cancelReservation(reservation)">{{ t('front-desk.reservations.cancel') }}</button></td>
+              <td class="actions reservation-actions">
+                <button
+                  v-if="reservation.canStartStay"
+                  class="secondary-button compact-action-button"
+                  type="button"
+                  :disabled="startingReservationId === reservation.id"
+                  @click="startReservationStay(reservation)">
+                  {{ t('front-desk.reservations.start-stay') }}
+                </button>
+                <button
+                  class="danger-ghost-button compact-action-button"
+                  type="button"
+                  :disabled="!['confirmed', 'readyForCheckIn'].includes(reservation.runtimeStatus) || cancellingReservationId === reservation.id || startingReservationId === reservation.id"
+                  @click="cancelReservation(reservation)">
+                  {{ t('front-desk.reservations.cancel') }}
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -132,4 +163,6 @@ function resolveFeedbackMessage(message) {
 .reservation-search-field { flex: 1 1 420px; max-width: 620px; }
 .reservation-search-box { width: 100%; }
 .reservation-table td { font-weight: 400; }
+.reservation-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.compact-action-button { min-height: 34px; padding: 0.45rem 0.7rem; font-size: 0.78rem; }
 </style>

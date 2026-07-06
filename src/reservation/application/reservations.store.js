@@ -52,6 +52,15 @@ const useReservationsStore = defineStore('reservations', () => {
   }
 
   /**
+   * @summary Starts a guest stay from a confirmed reservation when its arrival window is active.
+   * @param {number|string} reservationId Reservation id.
+   * @returns {{ok: boolean, message: string, stay?: object}}
+   */
+  function startReservationStay(reservationId) {
+    return dataContext.startReservationStay(reservationId)
+  }
+
+  /**
    * @summary Returns the label for a room status used in reservation forms.
    * @param {string} status Room status.
    * @returns {string}
@@ -77,6 +86,7 @@ const useReservationsStore = defineStore('reservations', () => {
     validateReservationAvailability,
     createReservation,
     cancelReservation,
+    startReservationStay,
     getRoomStatusLabel,
     fetchReservations
   }

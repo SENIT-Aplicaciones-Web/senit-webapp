@@ -38,7 +38,7 @@ const filteredPayments = computed(() => {
   const end = toDate.value ? new Date(`${toDate.value}T23:59:59`).getTime() : Date.now()
   return operationsStore.payments.filter(payment => {
     if (payment.subscriptionId || payment.plan) return false
-    if (payment.status !== 'completed' || !paymentBelongsToActiveHotel(payment)) return false
+    if (payment.status !== 'paid' || !paymentBelongsToActiveHotel(payment)) return false
     if (Number(payment.amount) <= 0) return false
     const paidAt = new Date(payment.paidAt).getTime()
     return !Number.isNaN(paidAt) && paidAt >= start && paidAt <= end
@@ -68,8 +68,8 @@ function paymentBelongsToActiveHotel(payment) {
   const hotelId = operationsStore.activeHotel?.id
   if (!hotelId) return false
   if (payment.hotelId) return sameId(payment.hotelId, hotelId)
-  if (payment.stayId) return operationsStore.guestStays.some(stay => sameId(stay.id, payment.stayId))
-  if (payment.reservationId) return operationsStore.reservations.some(reservation => sameId(reservation.id, payment.reservationId))
+  if (payment.stayId) return operationsStore.guestStays.some(stay => sameId(stay.id, payment.stayId) && sameId(stay.hotelId, hotelId))
+  if (payment.reservationId) return operationsStore.reservations.some(reservation => sameId(reservation.id, payment.reservationId) && sameId(reservation.hotelId, hotelId) && reservation.status !== 'cancelled')
   return false
 }
 

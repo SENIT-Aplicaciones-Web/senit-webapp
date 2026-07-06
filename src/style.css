@@ -391,7 +391,8 @@ table.data-table {
 .room-badge { background: #eef4ff; color: #1e3a8a; }
 .status-badge.active,
 .status-badge.occupied,
-.status-badge.confirmed { background: #dbeafe; color: #1d4ed8; }
+.status-badge.confirmed,
+.status-badge.readyForCheckIn { background: #dbeafe; color: #1d4ed8; }
 .status-badge.available,
 .status-badge.paid,
 .status-badge.finished,
