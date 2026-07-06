@@ -4,4 +4,4 @@ Test credentials:
 
 admin@admin.com / 123456
 
-recepcion@recepcion.com / 12345
+recepcion@recepcion.com / 123456
