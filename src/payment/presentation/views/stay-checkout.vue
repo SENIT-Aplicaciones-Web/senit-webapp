@@ -19,6 +19,11 @@ const editingConsumptionId = ref(null)
 const consumptionForm = reactive({ description: '', quantity: 1, unitPrice: 0 })
 const consumptionEditForm = reactive({ description: '', quantity: 1, unitPrice: 0 })
 const canModifyConsumptions = computed(() => stay.value && stay.value.status !== 'finished' && stay.value.paymentStatus !== 'paid')
+const isAddingConsumption = ref(false)
+const editingConsumptionBusyId = ref(null)
+const deletingConsumptionId = ref(null)
+const isConfirmingPayment = ref(false)
+const isIssuingReceipt = ref(false)
 
 function isAdminRoute() { return route.path.startsWith('/admin') }
 function goBack() {
@@ -31,16 +36,22 @@ function goBack() {
 function resetConsumptionForm() { Object.assign(consumptionForm, { description: '', quantity: 1, unitPrice: 0 }) }
 
 async function addConsumption() {
+  if (isAddingConsumption.value) return
   consumptionFeedback.value = { type: '', message: '' }
   if (!canModifyConsumptions.value) {
     consumptionFeedback.value = { type: 'error', message: t('front-desk.checkout.paid-consumption-locked') }
     return
   }
-  const result = await paymentsStore.addConsumption(route.params.id, consumptionForm)
-  consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (!result.ok) return
-  resetConsumptionForm()
-  showConsumptionForm.value = false
+  isAddingConsumption.value = true
+  try {
+    const result = await paymentsStore.addConsumption(route.params.id, consumptionForm)
+    consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (!result.ok) return
+    resetConsumptionForm()
+    showConsumptionForm.value = false
+  } finally {
+    isAddingConsumption.value = false
+  }
 }
 
 function startConsumptionEdit(consumption) {
@@ -58,28 +69,52 @@ function cancelConsumptionEdit() {
 }
 
 async function saveConsumptionEdit(consumption) {
-  const result = await paymentsStore.updateConsumption(consumption.id, consumptionEditForm)
-  consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (result.ok) editingConsumptionId.value = null
+  if (editingConsumptionBusyId.value) return
+  editingConsumptionBusyId.value = consumption.id
+  try {
+    const result = await paymentsStore.updateConsumption(consumption.id, consumptionEditForm)
+    consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (result.ok) editingConsumptionId.value = null
+  } finally {
+    editingConsumptionBusyId.value = null
+  }
 }
 
 async function removeConsumption(consumption) {
-  if (!canModifyConsumptions.value) return
-  const result = await paymentsStore.deleteConsumption(consumption.id)
-  consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  if (!canModifyConsumptions.value || deletingConsumptionId.value) return
+  deletingConsumptionId.value = consumption.id
+  try {
+    const result = await paymentsStore.deleteConsumption(consumption.id)
+    consumptionFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  } finally {
+    deletingConsumptionId.value = null
+  }
 }
 
 async function confirmPayment() {
+  if (isConfirmingPayment.value) return
   feedback.value = { type: '', message: '' }
-  const result = await paymentsStore.confirmPayment(route.params.id, paymentMethod.value)
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  isConfirmingPayment.value = true
+  try {
+    const result = await paymentsStore.confirmPayment(route.params.id, paymentMethod.value)
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  } finally {
+    isConfirmingPayment.value = false
+  }
 }
 
 async function issueReceipt() {
+  if (isIssuingReceipt.value) return
   feedback.value = { type: '', message: '' }
-  const result = await paymentsStore.issueInvoiceAndFinishStay(route.params.id)
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (!result.ok) return
+  isIssuingReceipt.value = true
+  let result
+  try {
+    result = await paymentsStore.issueInvoiceAndFinishStay(route.params.id)
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (!result.ok) return
+  } finally {
+    isIssuingReceipt.value = false
+  }
 
   const completedStay = result.stay
   downloadTextPdf({
@@ -144,7 +179,7 @@ function resolveFeedbackMessage(message) {
         <p class="payment-help">{{ t('front-desk.checkout.payment-process-help') }}</p>
         <div class="form-field checkout-payment-method">
           <label>{{ t('front-desk.checkout.payment-method') }}</label>
-          <select v-model="paymentMethod" :disabled="stay.status === 'finished'">
+          <select v-model="paymentMethod" :disabled="stay.status === 'finished' || isConfirmingPayment || isIssuingReceipt">
             <option value="cash">{{ t('front-desk.checkout.cash') }}</option>
             <option value="card">{{ t('front-desk.checkout.card') }}</option>
             <option value="transfer">{{ t('front-desk.checkout.transfer') }}</option>
@@ -153,8 +188,8 @@ function resolveFeedbackMessage(message) {
         </div>
         <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
         <div class="actions-row checkout-actions-row">
-          <button class="success-button checkout-action" type="button" :disabled="stay.status === 'finished' || stay.paymentStatus === 'paid'" @click="confirmPayment"><i class="pi pi-check"></i>{{ t('front-desk.checkout.confirm-payment') }}</button>
-          <button class="primary-button checkout-action" type="button" :disabled="stay.status === 'finished'" @click="issueReceipt"><i class="pi pi-file-pdf"></i>{{ t('front-desk.checkout.issue-receipt') }}</button>
+          <button class="success-button checkout-action" type="button" :disabled="stay.status === 'finished' || stay.paymentStatus === 'paid' || isConfirmingPayment || isIssuingReceipt" @click="confirmPayment"><i class="pi pi-check"></i>{{ t('front-desk.checkout.confirm-payment') }}</button>
+          <button class="primary-button checkout-action" type="button" :disabled="stay.status === 'finished' || isConfirmingPayment || isIssuingReceipt" @click="issueReceipt"><i class="pi pi-file-pdf"></i>{{ t('front-desk.checkout.issue-receipt') }}</button>
         </div>
       </article>
     </section>
@@ -162,7 +197,7 @@ function resolveFeedbackMessage(message) {
     <section class="panel-card checkout-consumptions-card">
       <div class="panel-header">
         <h2>{{ t('front-desk.stay-details.additional-consumptions') }}</h2>
-        <button class="secondary-button" type="button" :disabled="!canModifyConsumptions" @click="showConsumptionForm = !showConsumptionForm"><i class="pi pi-plus"></i>{{ t('front-desk.stay-details.add') }}</button>
+        <button class="secondary-button" type="button" :disabled="!canModifyConsumptions || isAddingConsumption" @click="showConsumptionForm = !showConsumptionForm"><i class="pi pi-plus"></i>{{ t('front-desk.stay-details.add') }}</button>
       </div>
 
       <p v-if="!canModifyConsumptions" class="help-message locked-consumption-message">{{ t('front-desk.checkout.paid-consumption-locked') }}</p>
@@ -170,7 +205,7 @@ function resolveFeedbackMessage(message) {
         <div class="form-field"><label>{{ t('front-desk.stay-details.product-or-service') }}</label><input v-model="consumptionForm.description" type="text" :placeholder="t('front-desk.stay-details.consumption-placeholder')" /></div>
         <div class="form-field"><label>{{ t('front-desk.common.quantity') }}</label><input v-model.number="consumptionForm.quantity" min="1" type="number" /></div>
         <div class="form-field"><label>{{ t('front-desk.stay-details.unit-price') }}</label><input v-model.number="consumptionForm.unitPrice" min="0" step="0.1" type="number" /></div>
-        <div class="form-field submit-field"><button class="success-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
+        <div class="form-field submit-field"><button class="success-button" type="submit" :disabled="isAddingConsumption"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
       </form>
       <p v-if="consumptionFeedback.message" class="feedback" :class="consumptionFeedback.type">{{ resolveFeedbackMessage(consumptionFeedback.message) }}</p>
 
@@ -184,14 +219,14 @@ function resolveFeedbackMessage(message) {
                 <td><input v-model.number="consumptionEditForm.quantity" min="1" type="number" class="table-input small" /></td>
                 <td><input v-model.number="consumptionEditForm.unitPrice" min="0" step="0.1" type="number" class="table-input small" /></td>
                 <td>S/ {{ (Number(consumptionEditForm.quantity) * Number(consumptionEditForm.unitPrice)).toFixed(2) }}</td>
-                <td class="actions"><div class="actions-row"><button class="success-button icon-action" type="button" @click="saveConsumptionEdit(consumption)"><i class="pi pi-check"></i></button><button class="ghost-button icon-action" type="button" @click="cancelConsumptionEdit"><i class="pi pi-times"></i></button></div></td>
+                <td class="actions"><div class="actions-row"><button class="success-button icon-action" type="button" :disabled="editingConsumptionBusyId === consumption.id" @click="saveConsumptionEdit(consumption)"><i class="pi pi-check"></i></button><button class="ghost-button icon-action" type="button" @click="cancelConsumptionEdit"><i class="pi pi-times"></i></button></div></td>
               </template>
               <template v-else>
                 <td>{{ consumption.description }}</td>
                 <td>{{ consumption.quantity }}</td>
                 <td>S/ {{ Number(consumption.unitPrice).toFixed(2) }}</td>
                 <td>S/ {{ (Number(consumption.quantity) * Number(consumption.unitPrice)).toFixed(2) }}</td>
-                <td class="actions"><div class="actions-row"><button class="mini-button icon-action" type="button" :disabled="!canModifyConsumptions" @click="startConsumptionEdit(consumption)"><i class="pi pi-pencil"></i></button><button class="danger-ghost-button icon-action" type="button" :disabled="!canModifyConsumptions" @click="removeConsumption(consumption)"><i class="pi pi-trash"></i></button></div></td>
+                <td class="actions"><div class="actions-row"><button class="mini-button icon-action" type="button" :disabled="!canModifyConsumptions" @click="startConsumptionEdit(consumption)"><i class="pi pi-pencil"></i></button><button class="danger-ghost-button icon-action" type="button" :disabled="!canModifyConsumptions || deletingConsumptionId === consumption.id" @click="removeConsumption(consumption)"><i class="pi pi-trash"></i></button></div></td>
               </template>
             </tr>
           </tbody>

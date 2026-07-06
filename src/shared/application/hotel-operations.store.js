@@ -330,7 +330,8 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     return {
       ...payment,
       stayId,
-      guestStayId: stayId ?? null
+      guestStayId: stayId ?? null,
+      status: payment.status === 'completed' ? 'paid' : payment.status
     }
   }
 
@@ -368,8 +369,12 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     return guests.value.find(guest => sameId(guest.id, guestId)) ?? null
   }
 
+  function isConfirmedPayment(payment) {
+    return ['paid', 'completed'].includes(String(payment?.status ?? '').toLowerCase())
+  }
+
   function getPaymentForStay(stayId) {
-    return payments.value.find(payment => sameId(payment.guestStayId, stayId) && payment.status === 'completed') ?? null
+    return payments.value.find(payment => sameId(payment.guestStayId, stayId) && isConfirmedPayment(payment)) ?? null
   }
 
   function getInvoiceForStay(stayId) {
@@ -573,6 +578,8 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
 
     if (reservationAmount <= 0) return { ok: false, message: 'front-desk.validation.reservation-payment-error' }
 
+    let createdReservation = null
+
     try {
       const reservationResponse = await reservationsEndpoint.create({
         hotelId: activeHotel.value?.id ?? '',
@@ -590,28 +597,41 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
         paymentStatus: 'paid',
         paidAt: new Date().toISOString()
       })
-      const reservation = normalizeReservation(reservationResponse.data)
-      reservations.value.push(reservation)
+      createdReservation = normalizeReservation(reservationResponse.data)
+      reservations.value.push(createdReservation)
 
       const paymentResponse = await paymentsEndpoint.create({
         hotelId: activeHotel.value?.id ?? '',
         guestStayId: null,
-        reservationId: reservation.id,
-        amount: money(reservation.reservationAmount || reservationAmount),
-        method: reservation.paymentMethod,
-        status: 'completed',
-        paidAt: reservation.paidAt ?? new Date().toISOString()
+        reservationId: createdReservation.id,
+        amount: money(createdReservation.reservationAmount || reservationAmount),
+        method: createdReservation.paymentMethod,
+        status: 'paid',
+        paidAt: createdReservation.paidAt ?? new Date().toISOString()
       })
       payments.value.push(normalizePayment(paymentResponse.data))
 
       await sendNotification({
         title: 'Nueva reserva registrada',
-        message: `${reservation.guestName} fue registrado para la habitación ${getRoomById(reservation.roomId)?.number}.`,
+        message: `${createdReservation.guestName} fue registrado para la habitación ${getRoomById(createdReservation.roomId)?.number}.`,
         type: 'success'
       })
 
-      return { ok: true, message: 'front-desk.reservations.created-successfully', reservation }
+      return { ok: true, message: 'front-desk.reservations.created-successfully', reservation: createdReservation }
     } catch (error) {
+      if (createdReservation) {
+        try {
+          const cancelledResponse = await reservationsEndpoint.update(createdReservation.id, {
+            ...createdReservation,
+            status: 'cancelled',
+            paymentStatus: 'pending',
+            paidAt: null
+          })
+          Object.assign(createdReservation, normalizeReservation(cancelledResponse.data))
+        } catch {
+          reservations.value = reservations.value.filter(item => !sameId(item.id, createdReservation.id))
+        }
+      }
       return { ok: false, message: getErrorMessage(error, 'front-desk.validation.reservation-payment-error') }
     }
   }
@@ -774,7 +794,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
         reservationId: null,
         amount: getStayTotal(stay),
         method,
-        status: 'completed',
+        status: 'paid',
         paidAt: new Date().toISOString()
       })
       const payment = normalizePayment(response.data)
@@ -807,26 +827,12 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
       const invoice = normalizeInvoice(invoiceResponse.data)
       invoices.value.push(invoice)
 
-      const room = getRoomById(stay.roomId)
-      if (room) {
-        const updatedRoom = { ...room, status: 'cleaning' }
-        const roomResponse = await roomsEndpoint.update(room.id, updatedRoom)
-        Object.assign(room, normalizeRoom(roomResponse.data))
-      }
-
-      const cleaningTaskResponse = await cleaningTasksEndpoint.create({
-        hotelId: activeHotel.value?.id ?? '',
-        roomId: stay.roomId,
-        description: `Limpieza post check-out Hab. ${room?.number ?? stay.roomId}`,
-        status: 'pending'
-      })
-      cleaningTasks.value.push(normalizeCleaningTask(cleaningTaskResponse.data))
-
       await sendNotification({
         title: 'Checkout finalizado',
-        message: `La habitación ${room?.number ?? stay.roomId} pasó a limpieza.`,
+        message: `La habitación ${stay.room?.number ?? stay.roomId} pasó a limpieza.`,
         type: 'success'
       })
+      await loadFromApi()
 
       return { ok: true, message: 'front-desk.checkout.receipt-finished', invoice, stay: getStayById(stayId) }
     } catch (error) {
@@ -896,6 +902,9 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
   async function updateRoom(roomId, roomData) {
     const room = getRoomById(roomId)
     if (!room) return { ok: false, message: 'admin.rooms.validation.not-found' }
+
+    const hasActiveStay = activeStaysWithDetails.value.some(stay => sameId(stay.roomId, roomId))
+    if (hasActiveStay) return { ok: false, message: 'admin.rooms.validation.active-stay-status' }
 
     const validation = validateRoomData(roomData, roomId)
     if (!validation.valid) return { ok: false, message: validation.message }

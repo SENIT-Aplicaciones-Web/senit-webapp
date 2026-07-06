@@ -13,6 +13,7 @@ const { t } = useI18n()
 const reservationsStore = useReservationsStore()
 const guestSearch = ref('')
 const feedback = ref({ type: '', message: '' })
+const cancellingReservationId = ref(null)
 
 const filteredReservations = computed(() => {
   const term = guestSearch.value.trim().toLowerCase()
@@ -44,8 +45,14 @@ function goToReservationForm() {
 }
 
 async function cancelReservation(reservation) {
-  const result = await reservationsStore.cancelReservation(reservation.id)
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  if (cancellingReservationId.value) return
+  cancellingReservationId.value = reservation.id
+  try {
+    const result = await reservationsStore.cancelReservation(reservation.id)
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  } finally {
+    cancellingReservationId.value = null
+  }
 }
 
 function resolveFeedbackMessage(message) {
@@ -109,7 +116,7 @@ function resolveFeedbackMessage(message) {
               <td>{{ formatDate(reservation.endAt) }}</td>
               <td>{{ formatTime(reservation.endAt) }}</td>
               <td><span class="status-badge" :class="reservation.runtimeStatus">{{ t('front-desk.reservation-status.' + toI18nKey(reservation.runtimeStatus)) }}</span></td>
-              <td class="actions"><button class="danger-ghost-button" type="button" :disabled="reservation.runtimeStatus !== 'confirmed'" @click="cancelReservation(reservation)">{{ t('front-desk.reservations.cancel') }}</button></td>
+              <td class="actions"><button class="danger-ghost-button" type="button" :disabled="reservation.runtimeStatus !== 'confirmed' || cancellingReservationId === reservation.id" @click="cancelReservation(reservation)">{{ t('front-desk.reservations.cancel') }}</button></td>
             </tr>
           </tbody>
         </table>

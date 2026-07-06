@@ -17,6 +17,7 @@ const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const submitted = ref(false)
+const isSigningUp = ref(false)
 const usernamePattern = /^[A-Za-z0-9_]+$/
 const formErrors = computed(() => {
   const errors = []
@@ -28,6 +29,7 @@ const formErrors = computed(() => {
 })
 
 async function onSignUp() {
+  if (isSigningUp.value) return
   submitted.value = true
   if (formErrors.value.length) return
 
@@ -37,10 +39,15 @@ async function onSignUp() {
     password: password.value
   })
 
-  const success = await iamStore.signUp(command)
+  isSigningUp.value = true
+  try {
+    const success = await iamStore.signUp(command)
 
-  if (success) {
-    window.setTimeout(() => router.push({ name: 'admin-dashboard' }), 700)
+    if (success) {
+      window.setTimeout(() => router.push({ name: 'admin-dashboard' }), 700)
+    }
+  } finally {
+    isSigningUp.value = false
   }
 }
 
@@ -89,8 +96,8 @@ function goToSignIn() {
           </p>
 
           <div class="button-row">
-            <pv-button :label="t('auth.register')" type="submit" class="auth-button" />
-            <pv-button :label="t('auth.back')" type="button" class="auth-button secondary-auth-button" @click="goToSignIn" />
+            <pv-button :label="t('auth.register')" type="submit" class="auth-button" :disabled="isSigningUp" />
+            <pv-button :label="t('auth.back')" type="button" class="auth-button secondary-auth-button" :disabled="isSigningUp" @click="goToSignIn" />
           </div>
         </form>
       </div>

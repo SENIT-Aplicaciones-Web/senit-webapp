@@ -15,6 +15,7 @@ const floorFilter = ref('all')
 const typeFilter = ref('all')
 const statusFilter = ref('all')
 const feedback = ref({ type: '', message: '' })
+const markingAvailableRoomId = ref(null)
 
 const statusLegend = computed(() => [
   { status: 'available', icon: 'pi pi-check-circle' },
@@ -68,8 +69,14 @@ function viewStay(room) {
   router.push({ name: route.path.startsWith('/admin') ? 'admin-stay-checkout' : 'front-desk-stay-checkout', params: { id: room.stayId } })
 }
 async function markAvailable(room) {
-  const result = await roomsStore.updateRoomStatus(room.id, 'available')
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  if (markingAvailableRoomId.value) return
+  markingAvailableRoomId.value = room.id
+  try {
+    const result = await roomsStore.updateRoomStatus(room.id, 'available')
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  } finally {
+    markingAvailableRoomId.value = null
+  }
 }
 
 function resolveFeedbackMessage(message) {
@@ -149,7 +156,7 @@ function resolveFeedbackMessage(message) {
             {{ t('front-desk.rooms.status.' + toI18nKey(room.runtimeStatus)) }}
           </span>
           <button v-if="room.stayId" class="mini-button room-tile-action" type="button" @click="viewStay(room)">{{ t('front-desk.rooms.go-checkout') }}</button>
-          <button v-else-if="room.status === 'cleaning'" class="success-soft-button room-tile-action" type="button" @click="markAvailable(room)">{{ t('front-desk.rooms.completed') }}</button>
+          <button v-else-if="room.status === 'cleaning'" class="success-soft-button room-tile-action" type="button" :disabled="markingAvailableRoomId === room.id" @click="markAvailable(room)">{{ t('front-desk.rooms.completed') }}</button>
         </article>
       </div>
     </section>

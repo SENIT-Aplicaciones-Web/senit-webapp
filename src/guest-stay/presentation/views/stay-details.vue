@@ -14,6 +14,7 @@ const showConsumptionForm = ref(false)
 const canModifyConsumptions = computed(() => stay.value && stay.value.status !== 'finished' && stay.value.paymentStatus !== 'paid')
 const feedback = ref({ type: '', message: '' })
 const consumptionForm = reactive({ description: '', quantity: 1, unitPrice: 0 })
+const isAddingConsumption = ref(false)
 
 function isAdminRoute() { return route.path.startsWith('/admin') }
 function routeName(frontDeskName, adminName) { return isAdminRoute() ? adminName : frontDeskName }
@@ -31,18 +32,24 @@ function goToCheckout() {
 }
 
 async function addConsumption() {
+  if (isAddingConsumption.value) return
   feedback.value = { type: '', message: '' }
   if (!canModifyConsumptions.value) {
     feedback.value = { type: 'error', message: t('front-desk.checkout.paid-consumption-locked') }
     return
   }
-  const result = await guestStaysStore.addConsumption(stay.value.id, consumptionForm)
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (result.ok) {
-    consumptionForm.description = ''
-    consumptionForm.quantity = 1
-    consumptionForm.unitPrice = 0
-    showConsumptionForm.value = false
+  isAddingConsumption.value = true
+  try {
+    const result = await guestStaysStore.addConsumption(stay.value.id, consumptionForm)
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (result.ok) {
+      consumptionForm.description = ''
+      consumptionForm.quantity = 1
+      consumptionForm.unitPrice = 0
+      showConsumptionForm.value = false
+    }
+  } finally {
+    isAddingConsumption.value = false
   }
 }
 
@@ -93,7 +100,7 @@ function resolveFeedbackMessage(message) {
     <section class="panel-card">
       <div class="panel-header">
         <h2>{{ t('front-desk.stay-details.additional-consumptions') }}</h2>
-        <button class="secondary-button" type="button" :disabled="!canModifyConsumptions" @click="showConsumptionForm = !showConsumptionForm"><i class="pi pi-plus"></i>{{ t('front-desk.stay-details.add') }}</button>
+        <button class="secondary-button" type="button" :disabled="!canModifyConsumptions || isAddingConsumption" @click="showConsumptionForm = !showConsumptionForm"><i class="pi pi-plus"></i>{{ t('front-desk.stay-details.add') }}</button>
       </div>
 
       <p v-if="!canModifyConsumptions" class="help-message">{{ t('front-desk.checkout.paid-consumption-locked') }}</p>
@@ -101,7 +108,7 @@ function resolveFeedbackMessage(message) {
         <div class="form-field"><label>{{ t('front-desk.stay-details.product-or-service') }}</label><input v-model="consumptionForm.description" type="text" :placeholder="t('front-desk.stay-details.consumption-placeholder')" /></div>
         <div class="form-field"><label>{{ t('front-desk.common.quantity') }}</label><input v-model.number="consumptionForm.quantity" min="1" type="number" /></div>
         <div class="form-field"><label>{{ t('front-desk.stay-details.unit-price') }}</label><input v-model.number="consumptionForm.unitPrice" min="0" step="0.1" type="number" /></div>
-        <div class="form-field submit-field"><button class="success-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
+        <div class="form-field submit-field"><button class="success-button" type="submit" :disabled="isAddingConsumption"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
       </form>
       <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
 

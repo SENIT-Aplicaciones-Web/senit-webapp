@@ -21,6 +21,7 @@ const form = reactive({
 const errors = reactive({})
 const feedback = ref({ type: '', message: '' })
 const createdStay = ref(null)
+const isSubmitting = ref(false)
 
 const checkInAvailableRooms = computed(() => guestStaysStore.getAvailableRoomsForCheckIn(form.hours))
 const selectedRoom = computed(() => guestStaysStore.getRoomById(form.roomId))
@@ -83,6 +84,7 @@ function resetForm() {
 }
 
 async function submitCheckIn() {
+  if (isSubmitting.value) return
   feedback.value = { type: '', message: '' }
   createdStay.value = null
   if (!validate()) {
@@ -90,11 +92,16 @@ async function submitCheckIn() {
     return
   }
 
-  const result = await guestStaysStore.createCheckIn(form)
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (result.ok) {
-    createdStay.value = result.stay
-    resetForm()
+  isSubmitting.value = true
+  try {
+    const result = await guestStaysStore.createCheckIn(form)
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (result.ok) {
+      createdStay.value = result.stay
+      resetForm()
+    }
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -115,7 +122,7 @@ function resolveFeedbackMessage(message) {
       </button>
     </section>
 
-    <form class="grid-two" @submit.prevent="submitCheckIn" novalidate>
+    <form class="grid-two" :aria-busy="isSubmitting" @submit.prevent="submitCheckIn" novalidate>
       <section class="form-card">
         <div class="panel-header"><h2>{{ t('front-desk.check-in.guest-information') }}</h2></div>
         <div class="form-grid">
@@ -179,7 +186,7 @@ function resolveFeedbackMessage(message) {
         </div>
 
         <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
-        <button class="primary-button check-in-submit-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.check-in.submit') }}</button>
+        <button class="primary-button check-in-submit-button" type="submit" :disabled="isSubmitting"><i class="pi pi-check"></i>{{ t('front-desk.check-in.submit') }}</button>
       </section>
     </form>
 

@@ -20,19 +20,27 @@ const recoveryEmail = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const showNewPassword = ref(false)
+const isSigningIn = ref(false)
+const isResettingPassword = ref(false)
 
 async function onSignIn() {
+  if (isSigningIn.value) return
   const command = new SignInCommand({
     email: email.value,
     password: password.value
   })
 
-  const success = await iamStore.signIn(command)
+  isSigningIn.value = true
+  try {
+    const success = await iamStore.signIn(command)
 
-  if (success) {
-    router.push(iamStore.currentUser?.role === 'ADMIN'
-        ? { name: 'admin-dashboard' }
-        : { name: 'front-desk-dashboard' })
+    if (success) {
+      router.push(iamStore.currentUser?.role === 'ADMIN'
+          ? { name: 'admin-dashboard' }
+          : { name: 'front-desk-dashboard' })
+    }
+  } finally {
+    isSigningIn.value = false
   }
 }
 
@@ -50,6 +58,7 @@ function backToSignIn() {
 }
 
 async function onResetPassword() {
+  if (isResettingPassword.value) return
   iamStore.clearMessages()
 
   if (!recoveryEmail.value || !recoveryEmail.value.includes('@')) {
@@ -67,13 +76,18 @@ async function onResetPassword() {
     return
   }
 
-  const success = await iamStore.resetPassword(recoveryEmail.value, newPassword.value)
-  if (success) {
-    email.value = recoveryEmail.value
-    password.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
-    isRecoveringPassword.value = false
+  isResettingPassword.value = true
+  try {
+    const success = await iamStore.resetPassword(recoveryEmail.value, newPassword.value)
+    if (success) {
+      email.value = recoveryEmail.value
+      password.value = ''
+      newPassword.value = ''
+      confirmPassword.value = ''
+      isRecoveringPassword.value = false
+    }
+  } finally {
+    isResettingPassword.value = false
   }
 }
 
@@ -93,7 +107,7 @@ function goToSignUp() {
 
         <h2>{{ t('credentials.demo') }}</h2>
         <h2>admin@admin.com / 123456</h2>
-        <h2>recepcion@recepcion.com / 123456</h2>
+        <h2>recepcion@recepcion.com / 12345</h2>
       </div>
     </section>
 
@@ -134,8 +148,8 @@ function goToSignUp() {
             </p>
 
             <div class="button-row">
-              <pv-button :label="t('auth.sign-in')" type="submit" class="auth-button" />
-              <pv-button :label="t('auth.sign-up')" type="button" class="auth-button" @click="goToSignUp" />
+              <pv-button :label="t('auth.sign-in')" type="submit" class="auth-button" :disabled="isSigningIn" />
+              <pv-button :label="t('auth.sign-up')" type="button" class="auth-button" :disabled="isSigningIn" @click="goToSignUp" />
             </div>
           </form>
         </template>
@@ -171,8 +185,8 @@ function goToSignUp() {
             </p>
 
             <div class="button-row">
-              <pv-button :label="t('auth.reset-password')" type="submit" class="auth-button" />
-              <pv-button :label="t('auth.back')" type="button" class="auth-button secondary-auth-button" @click="backToSignIn" />
+              <pv-button :label="t('auth.reset-password')" type="submit" class="auth-button" :disabled="isResettingPassword" />
+              <pv-button :label="t('auth.back')" type="button" class="auth-button secondary-auth-button" :disabled="isResettingPassword" @click="backToSignIn" />
             </div>
           </form>
         </template>

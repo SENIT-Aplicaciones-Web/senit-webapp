@@ -9,6 +9,10 @@ const { t } = useI18n()
 const creationFeedback = ref({ type: '', message: '' })
 const rowFeedback = reactive({})
 const editingRoomId = ref(null)
+const isSavingRoom = ref(false)
+const savingEditRoomId = ref(null)
+const deletingRoomId = ref(null)
+const changingStatusRoomId = ref(null)
 const searchTerm = ref('')
 const statusFilter = ref('all')
 const floorFilter = ref('all')
@@ -83,13 +87,25 @@ const filteredRooms = computed(() => {
 
 function setRowFeedback(roomId, type, message) { rowFeedback[roomId] = { type, message } }
 async function saveRoom() {
-  const result = await operationsStore.createRoom(form)
-  creationFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (result.ok) Object.assign(form, { number: '', floor: 1, type: 'Standard', capacity: 2, pricePerHour: 20, status: 'available' })
+  if (isSavingRoom.value) return
+  isSavingRoom.value = true
+  try {
+    const result = await operationsStore.createRoom(form)
+    creationFeedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (result.ok) Object.assign(form, { number: '', floor: 1, type: 'Standard', capacity: 2, pricePerHour: 20, status: 'available' })
+  } finally {
+    isSavingRoom.value = false
+  }
 }
 async function changeStatus(room, status) {
-  const result = await operationsStore.updateRoomStatus(room.id, status)
-  setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
+  if (changingStatusRoomId.value) return
+  changingStatusRoomId.value = room.id
+  try {
+    const result = await operationsStore.updateRoomStatus(room.id, status)
+    setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
+  } finally {
+    changingStatusRoomId.value = null
+  }
 }
 function startEdit(room) {
   editingRoomId.value = room.id
@@ -97,13 +113,25 @@ function startEdit(room) {
 }
 function cancelEdit() { editingRoomId.value = null }
 async function saveEdit(room) {
-  const result = await operationsStore.updateRoom(room.id, editForm)
-  setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
-  if (result.ok) editingRoomId.value = null
+  if (savingEditRoomId.value) return
+  savingEditRoomId.value = room.id
+  try {
+    const result = await operationsStore.updateRoom(room.id, editForm)
+    setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
+    if (result.ok) editingRoomId.value = null
+  } finally {
+    savingEditRoomId.value = null
+  }
 }
 async function deleteRoom(room) {
-  const result = await operationsStore.deleteRoom(room.id)
-  setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
+  if (deletingRoomId.value) return
+  deletingRoomId.value = room.id
+  try {
+    const result = await operationsStore.deleteRoom(room.id)
+    setRowFeedback(room.id, result.ok ? 'success' : 'error', result.message)
+  } finally {
+    deletingRoomId.value = null
+  }
 }
 
 function resolveFeedbackMessage(message) {
@@ -119,14 +147,14 @@ function resolveFeedbackMessage(message) {
 
     <article class="form-card admin-room-form-card">
       <div class="panel-header"><h2>{{ t('admin.rooms.new-room') }}</h2></div>
-      <form class="form-grid admin-room-form" @submit.prevent="saveRoom">
+      <form class="form-grid admin-room-form" :aria-busy="isSavingRoom" @submit.prevent="saveRoom">
         <div class="form-field"><label>{{ t('admin.rooms.number') }}</label><pv-input-text v-model="form.number" :placeholder="t('admin.rooms.number-placeholder')" /></div>
         <div class="form-field"><label>{{ t('admin.rooms.floor') }}</label><pv-input-number v-model="form.floor" :min="1" :use-grouping="false" input-id="room-floor" /></div>
         <div class="form-field"><label>{{ t('admin.rooms.type') }}</label><pv-select v-model="form.type" :options="roomTypeOptions" option-label="label" option-value="value" /></div>
         <div class="form-field"><label>{{ t('admin.rooms.capacity') }}</label><pv-input-number v-model="form.capacity" :min="1" :use-grouping="false" input-id="room-capacity" /></div>
         <div class="form-field"><label>{{ t('admin.rooms.price-per-hour-currency') }}</label><pv-input-number v-model="form.pricePerHour" prefix="S/ " :min="1" :min-fraction-digits="2" :max-fraction-digits="2" input-id="room-price" /></div>
         <div class="form-field"><label>{{ t('admin.rooms.initial-status') }}</label><pv-select v-model="form.status" :options="statusOptions" option-label="label" option-value="value" /></div>
-        <div class="form-field submit-field"><button class="primary-button" type="submit"><i class="pi pi-plus"></i>{{ t('admin.rooms.register-room') }}</button></div>
+        <div class="form-field submit-field"><button class="primary-button" type="submit" :disabled="isSavingRoom"><i class="pi pi-plus"></i>{{ t('admin.rooms.register-room') }}</button></div>
       </form>
       <p v-if="creationFeedback.message" class="feedback slim-feedback" :class="creationFeedback.type">{{ resolveFeedbackMessage(creationFeedback.message) }}</p>
     </article>
@@ -179,14 +207,15 @@ function resolveFeedbackMessage(message) {
                 :options="statusOptions"
                 option-label="label"
                 option-value="value"
+                :disabled="changingStatusRoomId === room.id"
                 @update:model-value="changeStatus(room, $event)"
               />
             </label>
             <p v-if="rowFeedback[room.id]?.message" class="inline-feedback" :class="rowFeedback[room.id].type">{{ resolveFeedbackMessage(rowFeedback[room.id].message) }}</p>
           </div>
           <div class="row-actions action-pair">
-            <button class="mini-button edit-button" type="button" @click="startEdit(room)"><i class="pi pi-pencil"></i>{{ t('shared.actions.edit') }}</button>
-            <button class="danger-ghost-button" type="button" @click="deleteRoom(room)"><i class="pi pi-trash"></i>{{ t('shared.actions.delete') }}</button>
+            <button class="mini-button edit-button" type="button" :disabled="Boolean(room.stayId) || savingEditRoomId === room.id || deletingRoomId === room.id" @click="startEdit(room)"><i class="pi pi-pencil"></i>{{ t('shared.actions.edit') }}</button>
+            <button class="danger-ghost-button" type="button" :disabled="Boolean(room.stayId) || deletingRoomId === room.id" @click="deleteRoom(room)"><i class="pi pi-trash"></i>{{ t('shared.actions.delete') }}</button>
           </div>
 
           <div v-if="editingRoomId === room.id" class="inline-edit-panel">
@@ -198,7 +227,7 @@ function resolveFeedbackMessage(message) {
               <div class="form-field"><label>{{ t('admin.rooms.price-per-hour-currency') }}</label><pv-input-number v-model="editForm.pricePerHour" prefix="S/ " :min="1" :min-fraction-digits="2" :max-fraction-digits="2" /></div>
               <div class="form-field submit-field">
                 <div class="actions-row">
-                  <button class="success-button" type="button" @click="saveEdit(room)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>
+                  <button class="success-button" type="button" :disabled="savingEditRoomId === room.id" @click="saveEdit(room)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>
                   <button class="ghost-button" type="button" @click="cancelEdit">{{ t('shared.actions.cancel') }}</button>
                 </div>
               </div>

@@ -8,6 +8,7 @@ const router = useRouter()
 const operationsStore = useHotelOperationsStore()
 const { t } = useI18n()
 const feedback = ref({ type: '', message: '' })
+const isSavingHotel = ref(false)
 const form = reactive({ name: '', ruc: '', address: '', phone: '', email: '', plan: '' })
 
 watchEffect(() => {
@@ -16,8 +17,14 @@ watchEffect(() => {
 })
 
 async function saveHotel() {
-  const result = await operationsStore.updateHotel({ name: form.name, ruc: form.ruc, address: form.address, phone: form.phone, email: form.email })
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  if (isSavingHotel.value) return
+  isSavingHotel.value = true
+  try {
+    const result = await operationsStore.updateHotel({ name: form.name, ruc: form.ruc, address: form.address, phone: form.phone, email: form.email })
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+  } finally {
+    isSavingHotel.value = false
+  }
 }
 
 function resolveFeedbackMessage(message) {
@@ -30,7 +37,7 @@ function resolveFeedbackMessage(message) {
     <section class="page-header"><div><h1>{{ t('admin.hotel.title') }}</h1><p>{{ t('admin.hotel.subtitle') }}</p></div></section>
     <section class="form-card">
       <div class="panel-header"><h2>{{ t('admin.hotel.establishment-data') }}</h2></div>
-      <form class="form-grid" @submit.prevent="saveHotel">
+      <form class="form-grid" :aria-busy="isSavingHotel" @submit.prevent="saveHotel">
         <div class="form-field"><label>{{ t('admin.hotel.commercial-name') }}</label><pv-input-text v-model="form.name" /></div>
         <div class="form-field"><label>{{ t('admin.hotel.ruc') }}</label><pv-input-text v-model="form.ruc" /></div>
         <div class="form-field full"><label>{{ t('admin.hotel.address') }}</label><pv-input-text v-model="form.address" /></div>
@@ -40,7 +47,7 @@ function resolveFeedbackMessage(message) {
         <div class="form-field plan-button-field">
           <button class="secondary-button" type="button" @click="router.push({ name: 'admin-subscription' })"><i class="pi pi-credit-card"></i>{{ t('admin.hotel.manage-subscription') }}</button>
         </div>
-        <div class="form-field full submit-field"><button class="primary-button" type="submit"><i class="pi pi-save"></i>{{ t('admin.hotel.save-changes') }}</button></div>
+        <div class="form-field full submit-field"><button class="primary-button" type="submit" :disabled="isSavingHotel"><i class="pi pi-save"></i>{{ t('admin.hotel.save-changes') }}</button></div>
       </form>
       <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
     </section>

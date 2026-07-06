@@ -24,6 +24,7 @@ const form = reactive({
 })
 const errors = reactive({})
 const feedback = ref({ type: '', message: '' })
+const isSubmitting = ref(false)
 
 function toDateInputValue(date) {
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
@@ -91,14 +92,20 @@ function validate() {
   return valid
 }
 async function submitReservation() {
+  if (isSubmitting.value) return
   feedback.value = { type: '', message: '' }
   if (!validate()) {
     feedback.value = { type: 'error', message: t('front-desk.check-in.validation.fix-fields') }
     return
   }
-  const result = await reservationsStore.createReservation({ ...form, startAt: startAt.value, endAt: endAt.value })
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (result.ok) window.setTimeout(goBackToReservations, 1400)
+  isSubmitting.value = true
+  try {
+    const result = await reservationsStore.createReservation({ ...form, startAt: startAt.value, endAt: endAt.value })
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (result.ok) window.setTimeout(goBackToReservations, 1400)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 function resolveFeedbackMessage(message) {
@@ -113,7 +120,7 @@ function resolveFeedbackMessage(message) {
       <button class="secondary-button" type="button" @click="goBackToReservations"><i class="pi pi-arrow-left"></i>{{ t('shared.actions.back') }}</button>
     </section>
 
-    <form class="grid-two reservation-form-layout" @submit.prevent="submitReservation" novalidate>
+    <form class="grid-two reservation-form-layout" :aria-busy="isSubmitting" @submit.prevent="submitReservation" novalidate>
       <section class="form-card">
         <div class="panel-header"><h2>{{ t('front-desk.reservation-form.owner-data') }}</h2></div>
         <div class="form-grid">
@@ -186,8 +193,8 @@ function resolveFeedbackMessage(message) {
         </div>
         <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
         <div class="actions-row reservation-actions">
-          <button class="primary-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.reservation-form.create') }}</button>
-          <button class="ghost-button" type="button" @click="goBackToReservations">{{ t('front-desk.reservation-form.cancel') }}</button>
+          <button class="primary-button" type="submit" :disabled="isSubmitting"><i class="pi pi-check"></i>{{ t('front-desk.reservation-form.create') }}</button>
+          <button class="ghost-button" type="button" :disabled="isSubmitting" @click="goBackToReservations">{{ t('front-desk.reservation-form.cancel') }}</button>
         </div>
       </section>
     </form>

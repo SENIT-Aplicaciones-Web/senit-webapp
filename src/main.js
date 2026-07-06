@@ -30,7 +30,10 @@ createApp(App)
     .use(i18n)
     .use(PrimeVue, {
         theme: {
-            preset: Material
+            preset: Material,
+            options: {
+                darkModeSelector: '.senit-dark-theme'
+            }
         },
         ripple: true
     })

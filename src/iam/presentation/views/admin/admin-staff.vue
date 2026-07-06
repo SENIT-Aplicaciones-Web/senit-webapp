@@ -11,6 +11,9 @@ const { t } = useI18n()
 const feedback = ref({ type: '', message: '' })
 const rowFeedback = reactive({})
 const editingUserId = ref(null)
+const isSavingStaff = ref(false)
+const savingEditUserId = ref(null)
+const deletingUserId = ref(null)
 const searchTerm = ref('')
 const roleFilter = ref('all')
 const form = reactive({ fullName: '', username: '', email: '', role: 'FRONT_DESK', password: '123456' })
@@ -39,11 +42,17 @@ const staff = computed(() => {
 })
 
 async function saveStaffUser() {
-  const result = await operationsStore.createStaffUser(form)
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  if (result.ok) {
-    await iamStore.refreshUsers()
-    Object.assign(form, { fullName: '', username: '', email: '', role: 'FRONT_DESK', password: '123456' })
+  if (isSavingStaff.value) return
+  isSavingStaff.value = true
+  try {
+    const result = await operationsStore.createStaffUser(form)
+    feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
+    if (result.ok) {
+      await iamStore.refreshUsers()
+      Object.assign(form, { fullName: '', username: '', email: '', role: 'FRONT_DESK', password: '123456' })
+    }
+  } finally {
+    isSavingStaff.value = false
   }
 }
 
@@ -54,9 +63,15 @@ function startEdit(user) {
 }
 function cancelEdit() { editingUserId.value = null }
 async function saveEdit(user) {
-  const result = await operationsStore.updateStaffUser(user.id, editForm)
-  setRowFeedback(user.id, result.ok ? 'success' : 'error', result.message)
-  if (result.ok) { await iamStore.refreshUsers(); editingUserId.value = null }
+  if (savingEditUserId.value) return
+  savingEditUserId.value = user.id
+  try {
+    const result = await operationsStore.updateStaffUser(user.id, editForm)
+    setRowFeedback(user.id, result.ok ? 'success' : 'error', result.message)
+    if (result.ok) { await iamStore.refreshUsers(); editingUserId.value = null }
+  } finally {
+    savingEditUserId.value = null
+  }
 }
 function getInitials(user) {
   const source = user.fullName || user.username || user.email || 'SN'
@@ -72,9 +87,15 @@ function registeredAtLabel(user) {
 }
 
 async function deleteUser(user) {
-  const result = await operationsStore.deleteStaffUser(user.id)
-  setRowFeedback(user.id, result.ok ? 'success' : 'error', result.message)
-  if (result.ok) await iamStore.refreshUsers()
+  if (deletingUserId.value) return
+  deletingUserId.value = user.id
+  try {
+    const result = await operationsStore.deleteStaffUser(user.id)
+    setRowFeedback(user.id, result.ok ? 'success' : 'error', result.message)
+    if (result.ok) await iamStore.refreshUsers()
+  } finally {
+    deletingUserId.value = null
+  }
 }
 
 function resolveFeedbackMessage(message) {
@@ -88,13 +109,13 @@ function resolveFeedbackMessage(message) {
 
     <article class="form-card admin-full-card">
       <div class="panel-header"><h2>{{ t('admin.staff.new-staff-user') }}</h2></div>
-      <form class="form-grid admin-staff-form" @submit.prevent="saveStaffUser">
+      <form class="form-grid admin-staff-form" :aria-busy="isSavingStaff" @submit.prevent="saveStaffUser">
         <div class="form-field full"><label>{{ t('admin.staff.full-name') }}</label><pv-input-text v-model="form.fullName" required /></div>
         <div class="form-field"><label>{{ t('admin.staff.username') }}</label><pv-input-text v-model="form.username" required /></div>
         <div class="form-field"><label>{{ t('admin.staff.email') }}</label><pv-input-text v-model="form.email" required /></div>
         <div class="form-field"><label>{{ t('admin.staff.role') }}</label><pv-select v-model="form.role" :options="roleOptions" option-label="label" option-value="value" /></div>
         <div class="form-field"><label>{{ t('admin.staff.initial-password') }}</label><pv-input-text v-model="form.password" /></div>
-        <div class="form-field full"><button class="primary-button" type="submit"><i class="pi pi-user-plus"></i>{{ t('admin.staff.register-user') }}</button></div>
+        <div class="form-field full"><button class="primary-button" type="submit" :disabled="isSavingStaff"><i class="pi pi-user-plus"></i>{{ t('admin.staff.register-user') }}</button></div>
       </form>
       <p v-if="feedback.message" class="feedback slim-feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
     </article>
@@ -132,8 +153,8 @@ function resolveFeedbackMessage(message) {
             <small>{{ registeredAtLabel(user) }}</small>
           </div>
           <div class="row-actions action-pair">
-            <button class="mini-button edit-button" type="button" @click="startEdit(user)"><i class="pi pi-pencil"></i>{{ t('shared.actions.edit') }}</button>
-            <button class="danger-ghost-button" type="button" @click="deleteUser(user)"><i class="pi pi-trash"></i>{{ t('shared.actions.delete') }}</button>
+            <button class="mini-button edit-button" type="button" :disabled="savingEditUserId === user.id || deletingUserId === user.id" @click="startEdit(user)"><i class="pi pi-pencil"></i>{{ t('shared.actions.edit') }}</button>
+            <button class="danger-ghost-button" type="button" :disabled="deletingUserId === user.id" @click="deleteUser(user)"><i class="pi pi-trash"></i>{{ t('shared.actions.delete') }}</button>
           </div>
           <p v-if="rowFeedback[user.id]?.message" class="inline-feedback" :class="rowFeedback[user.id].type">{{ resolveFeedbackMessage(rowFeedback[user.id].message) }}</p>
           <div v-if="editingUserId === user.id" class="inline-edit-panel">
@@ -145,7 +166,7 @@ function resolveFeedbackMessage(message) {
               <div class="form-field"><label>{{ t('admin.staff.optional-password') }}</label><pv-input-text v-model="editForm.password" /></div>
               <div class="form-field submit-field">
                 <div class="actions-row">
-                  <button class="success-button" type="button" @click="saveEdit(user)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>
+                  <button class="success-button" type="button" :disabled="savingEditUserId === user.id" @click="saveEdit(user)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>
                   <button class="ghost-button" type="button" @click="cancelEdit">{{ t('shared.actions.cancel') }}</button>
                 </div>
               </div>

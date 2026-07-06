@@ -9,6 +9,7 @@ const { t } = useI18n()
 const subscriptionsStore = useSubscriptionsStore()
 const selectedPlan = ref(subscriptionsStore.currentPlan)
 const exportFeedback = ref('')
+const isSavingPlan = ref(false)
 
 const planOptions = computed(() => [
   { name: 'Basic', price: 29.99 },
@@ -24,7 +25,13 @@ watch(currentPlan, plan => {
 })
 
 async function savePlan() {
-  await subscriptionsStore.updateSubscription(selectedPlan.value)
+  if (isSavingPlan.value) return
+  isSavingPlan.value = true
+  try {
+    await subscriptionsStore.updateSubscription(selectedPlan.value)
+  } finally {
+    isSavingPlan.value = false
+  }
 }
 
 function exportPaymentHistory() {
@@ -81,14 +88,14 @@ function exportPaymentHistory() {
         </div>
         <div class="form-field">
           <label>{{ t('subscription.plan-type') }}</label>
-          <select v-model="selectedPlan">
+          <select v-model="selectedPlan" :disabled="isSavingPlan">
             <option v-for="plan in planOptions" :key="plan.name" :value="plan.name">
               {{ plan.name }} · S/ {{ plan.price }} / {{ t('subscription.month') }}
             </option>
           </select>
         </div>
         <p class="help-message">{{ t('subscription.plan-affects-users') }}</p>
-        <button class="primary-button subscription-save-button" type="button" @click="savePlan">
+        <button class="primary-button subscription-save-button" type="button" :disabled="isSavingPlan" @click="savePlan">
           <i class="pi pi-refresh"></i>{{ t('subscription.change-plan') }}
         </button>
       </article>

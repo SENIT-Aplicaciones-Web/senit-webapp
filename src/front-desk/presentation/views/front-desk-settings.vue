@@ -13,6 +13,7 @@ const iamStore = useIamStore()
 const frontDeskStore = useFrontDeskStore()
 const passwordForm = reactive({ newPassword: '', confirmPassword: '' })
 const passwordFeedback = ref({ type: '', message: '' })
+const isChangingPassword = ref(false)
 
 const lastAccess = computed(() => {
   const stored = localStorage.getItem('senit-webapp-last-access')
@@ -24,6 +25,7 @@ const roleLabel = computed(() => iamStore.currentUser?.role === 'ADMIN'
   : t('front-desk.navigation.role-reception'))
 
 async function changePassword() {
+  if (isChangingPassword.value) return
   passwordFeedback.value = { type: '', message: '' }
   if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
     passwordFeedback.value = { type: 'error', message: t('front-desk.settings.password-too-short') }
@@ -33,12 +35,17 @@ async function changePassword() {
     passwordFeedback.value = { type: 'error', message: t('front-desk.settings.passwords-do-not-match') }
     return
   }
-  const success = await iamStore.changePassword(passwordForm.newPassword)
-  passwordFeedback.value = {
-    type: success ? 'success' : 'error',
-    message: success ? t('front-desk.settings.password-updated') : t('front-desk.settings.password-update-error')
+  isChangingPassword.value = true
+  try {
+    const success = await iamStore.changePassword(passwordForm.newPassword)
+    passwordFeedback.value = {
+      type: success ? 'success' : 'error',
+      message: success ? t('front-desk.settings.password-updated') : t('front-desk.settings.password-update-error')
+    }
+    if (success) Object.assign(passwordForm, { newPassword: '', confirmPassword: '' })
+  } finally {
+    isChangingPassword.value = false
   }
-  if (success) Object.assign(passwordForm, { newPassword: '', confirmPassword: '' })
 }
 
 function signOut() {
@@ -76,10 +83,10 @@ function signOut() {
       <article class="form-card">
         <div class="panel-header"><h2>{{ t('front-desk.settings.security') }}</h2></div>
         <p class="help-message">{{ t('front-desk.settings.account-managed') }}</p>
-        <form class="form-grid password-grid" @submit.prevent="changePassword">
+        <form class="form-grid password-grid" :aria-busy="isChangingPassword" @submit.prevent="changePassword">
           <div class="form-field"><label>{{ t('front-desk.settings.new-password') }}</label><input v-model="passwordForm.newPassword" type="password" /></div>
           <div class="form-field"><label>{{ t('front-desk.settings.confirm-password') }}</label><input v-model="passwordForm.confirmPassword" type="password" /></div>
-          <div class="form-field full"><button class="secondary-button" type="submit"><i class="pi pi-lock"></i>{{ t('front-desk.settings.change-password') }}</button></div>
+          <div class="form-field full"><button class="secondary-button" type="submit" :disabled="isChangingPassword"><i class="pi pi-lock"></i>{{ t('front-desk.settings.change-password') }}</button></div>
         </form>
         <p v-if="passwordFeedback.message" class="feedback" :class="passwordFeedback.type">{{ passwordFeedback.message }}</p>
       </article>

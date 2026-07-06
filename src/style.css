@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   font-family: Tahoma, Verdana, Arial, sans-serif;
   color: #111827;
   background: #ffffff;
@@ -1304,6 +1305,7 @@ input[type="number"] {
 }
 
 :root {
+  color-scheme: light;
   --senit-ink: #183a8f;
   --senit-soft-blue: #eef5ff;
   --senit-danger-soft: #fff1f2;
