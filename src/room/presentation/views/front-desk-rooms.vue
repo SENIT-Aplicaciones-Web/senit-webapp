@@ -16,6 +16,19 @@ const typeFilter = ref('all')
 const statusFilter = ref('all')
 const feedback = ref({ type: '', message: '' })
 
+const statusLegend = computed(() => [
+  { status: 'available', icon: 'pi pi-check-circle' },
+  { status: 'occupied', icon: 'pi pi-user' },
+  { status: 'endingSoon', icon: 'pi pi-clock' },
+  { status: 'overdue', icon: 'pi pi-exclamation-triangle' },
+  { status: 'cleaning', icon: 'pi pi-sparkles' },
+  { status: 'maintenance', icon: 'pi pi-wrench' }
+])
+
+function getRoomStatusIcon(status) {
+  return statusLegend.value.find(item => item.status === status)?.icon ?? 'pi pi-info-circle'
+}
+
 
 function uniqueValues(values) {
   return values.reduce((uniqueItems, value) => {
@@ -112,6 +125,13 @@ function resolveFeedbackMessage(message) {
       </div>
     </section>
 
+    <section class="room-status-legend panel-card" :aria-label="t('front-desk.rooms.state')">
+      <span v-for="item in statusLegend" :key="item.status" class="room-legend-item" :class="item.status">
+        <i :class="item.icon"></i>
+        {{ t('front-desk.rooms.status.' + toI18nKey(item.status)) }}
+      </span>
+    </section>
+
     <p v-if="feedback.message" class="feedback slim-feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
 
     <section v-for="group in roomsByFloor" :key="group.floor" class="panel-card room-floor-panel">
@@ -124,7 +144,10 @@ function resolveFeedbackMessage(message) {
           <span class="room-number">{{ room.number }}</span>
           <span class="room-type">{{ room.type }}</span>
           <span v-if="room.guestName" class="room-guest">{{ room.guestName }}</span>
-          <span class="room-status-text">{{ t('front-desk.rooms.status.' + toI18nKey(room.runtimeStatus)) }}</span>
+          <span class="room-status-pill" :class="room.runtimeStatus">
+            <i :class="getRoomStatusIcon(room.runtimeStatus)"></i>
+            {{ t('front-desk.rooms.status.' + toI18nKey(room.runtimeStatus)) }}
+          </span>
           <button v-if="room.stayId" class="mini-button room-tile-action" type="button" @click="viewStay(room)">{{ t('front-desk.rooms.go-checkout') }}</button>
           <button v-else-if="room.status === 'cleaning'" class="success-soft-button room-tile-action" type="button" @click="markAvailable(room)">{{ t('front-desk.rooms.completed') }}</button>
         </article>
@@ -409,4 +432,50 @@ function resolveFeedbackMessage(message) {
   background: #dcfce7;
   color: #15803d;
 }
+
+.room-status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.room-legend-item,
+.room-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.room-legend-item {
+  min-height: 32px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+.room-status-pill {
+  margin-top: auto;
+  padding: 0.48rem 0.62rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.room-status-pill.available,
+.room-legend-item.available { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+.room-status-pill.occupied,
+.room-legend-item.occupied { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+.room-status-pill.endingSoon,
+.room-legend-item.endingSoon { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+.room-status-pill.overdue,
+.room-legend-item.overdue { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.room-status-pill.cleaning,
+.room-legend-item.cleaning { background: #ccfbf1; color: #0f766e; border: 1px dashed #14b8a6; }
+.room-status-pill.maintenance,
+.room-legend-item.maintenance { background: #f1f5f9; color: #475569; border: 1px solid #94a3b8; }
 </style>

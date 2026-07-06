@@ -18,7 +18,8 @@ export class UserAssembler {
       username: resource.username,
       role: resource.role,
       status: resource.status,
-      createdAt: resource.createdAt
+      createdAt: resource.createdAt,
+      token: resource.token ?? resource.accessToken ?? ''
     })
   }
 
@@ -46,7 +47,8 @@ export class UserAssembler {
       username: user.username,
       role: user.role,
       status: user.status,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
+      token: user.token
     }
   }
 }

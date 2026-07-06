@@ -1,5 +1,4 @@
 <script setup>
-// This component represents a dashboard metric card used by the administrator and receptionist views.
 defineProps({
   label: { type: String, required: true },
   value: { type: [String, Number], required: true },

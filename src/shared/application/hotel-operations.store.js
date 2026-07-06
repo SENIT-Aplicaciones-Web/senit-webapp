@@ -236,6 +236,10 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
   })
 
   async function loadFromApi() {
+    if (!iamStore.currentUser?.token) {
+      return
+    }
+
     try {
       const currentHotelId = iamStore.currentUser?.hotelId
       const hotelParams = currentHotelId ? { hotelId: currentHotelId } : {}

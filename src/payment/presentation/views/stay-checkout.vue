@@ -142,7 +142,7 @@ function resolveFeedbackMessage(message) {
           <div class="result-item"><span>{{ t('front-desk.checkout.payment-status') }} <small>{{ t('front-desk.payment-status.' + toI18nKey(stay.paymentStatus)) }}</small></span><span class="status-badge" :class="stay.paymentStatus === 'paid' ? 'paid' : 'pending'">{{ t('front-desk.payment-status.' + toI18nKey(stay.paymentStatus)) }}</span></div>
         </div>
         <p class="payment-help">{{ t('front-desk.checkout.payment-process-help') }}</p>
-        <div class="form-field" style="margin-top:1rem;">
+        <div class="form-field checkout-payment-method">
           <label>{{ t('front-desk.checkout.payment-method') }}</label>
           <select v-model="paymentMethod" :disabled="stay.status === 'finished'">
             <option value="cash">{{ t('front-desk.checkout.cash') }}</option>
@@ -170,7 +170,7 @@ function resolveFeedbackMessage(message) {
         <div class="form-field"><label>{{ t('front-desk.stay-details.product-or-service') }}</label><input v-model="consumptionForm.description" type="text" :placeholder="t('front-desk.stay-details.consumption-placeholder')" /></div>
         <div class="form-field"><label>{{ t('front-desk.common.quantity') }}</label><input v-model.number="consumptionForm.quantity" min="1" type="number" /></div>
         <div class="form-field"><label>{{ t('front-desk.stay-details.unit-price') }}</label><input v-model.number="consumptionForm.unitPrice" min="0" step="0.1" type="number" /></div>
-        <div class="form-field" style="justify-content:end;"><button class="success-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
+        <div class="form-field submit-field"><button class="success-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
       </form>
       <p v-if="consumptionFeedback.message" class="feedback" :class="consumptionFeedback.type">{{ resolveFeedbackMessage(consumptionFeedback.message) }}</p>
 
@@ -204,6 +204,14 @@ function resolveFeedbackMessage(message) {
 </template>
 
 <style scoped>
+.checkout-payment-method {
+  margin-top: 1rem;
+}
+
+.submit-field {
+  justify-content: end;
+}
+
 .checkout-info-grid {
   grid-template-columns: 1fr;
 }

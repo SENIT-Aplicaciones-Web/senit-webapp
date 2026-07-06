@@ -7,7 +7,8 @@ export class User {
     username = '',
     role = 'FRONT_DESK',
     status = 'active',
-    createdAt = ''
+    createdAt = '',
+    token = ''
   } = {}) {
     this.id = id
     this.hotelId = hotelId
@@ -17,5 +18,6 @@ export class User {
     this.role = role
     this.status = status
     this.createdAt = createdAt
+    this.token = token
   }
 }

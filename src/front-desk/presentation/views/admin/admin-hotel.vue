@@ -40,7 +40,7 @@ function resolveFeedbackMessage(message) {
         <div class="form-field plan-button-field">
           <button class="secondary-button" type="button" @click="router.push({ name: 'admin-subscription' })"><i class="pi pi-credit-card"></i>{{ t('admin.hotel.manage-subscription') }}</button>
         </div>
-        <div class="form-field full" style="justify-content:end;"><button class="primary-button" type="submit"><i class="pi pi-save"></i>{{ t('admin.hotel.save-changes') }}</button></div>
+        <div class="form-field full submit-field"><button class="primary-button" type="submit"><i class="pi pi-save"></i>{{ t('admin.hotel.save-changes') }}</button></div>
       </form>
       <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
     </section>
@@ -48,5 +48,9 @@ function resolveFeedbackMessage(message) {
 </template>
 
 <style scoped>
+.submit-field {
+  justify-content: end;
+}
+
 .plan-button-field { justify-content: end; }
 </style>

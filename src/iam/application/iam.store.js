@@ -56,6 +56,24 @@ const useIamStore = defineStore('iam', () => {
         }
     }
 
+    async function resetPassword(email, newPassword) {
+        errors.value = []
+        successMessage.value = ''
+
+        try {
+            const passwordWasReset = await AuthenticationApi.resetPassword(email, newPassword)
+            if (!passwordWasReset) {
+                errors.value.push(new Error('auth.recovery-user-not-found'))
+                return false
+            }
+            successMessage.value = 'auth.password-reset-successfully'
+            return true
+        } catch (error) {
+            errors.value.push(new Error('auth.api-unavailable'))
+            return false
+        }
+    }
+
     async function refreshUsers() {
         try {
             users.value = await AuthenticationApi.getUsers(currentUser.value?.hotelId)
@@ -106,6 +124,7 @@ const useIamStore = defineStore('iam', () => {
         signIn,
         signUp,
         refreshUsers,
+        resetPassword,
         changePassword,
         clearMessages,
         signOut

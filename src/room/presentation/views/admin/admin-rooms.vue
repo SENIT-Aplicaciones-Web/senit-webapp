@@ -38,10 +38,25 @@ const statusOptions = computed(() => [
   { label: t('front-desk.rooms.status.maintenance'), value: 'maintenance' }
 ])
 
+
+const statusLegend = computed(() => [
+  { status: 'available', icon: 'pi pi-check-circle' },
+  { status: 'occupied', icon: 'pi pi-user' },
+  { status: 'endingSoon', icon: 'pi pi-clock' },
+  { status: 'cleaning', icon: 'pi pi-sparkles' },
+  { status: 'maintenance', icon: 'pi pi-wrench' },
+  { status: 'overdue', icon: 'pi pi-exclamation-triangle' }
+])
+
+function getRoomStatusIcon(status) {
+  return statusLegend.value.find(item => item.status === status)?.icon ?? 'pi pi-info-circle'
+}
+
 const statusFilterOptions = computed(() => [
   { label: t('front-desk.rooms.all'), value: 'all' },
   { label: t('front-desk.rooms.status.available'), value: 'available' },
   { label: t('front-desk.rooms.status.occupied'), value: 'occupied' },
+  { label: t('front-desk.rooms.status.ending-soon'), value: 'endingSoon' },
   { label: t('front-desk.rooms.status.cleaning'), value: 'cleaning' },
   { label: t('front-desk.rooms.status.maintenance'), value: 'maintenance' },
   { label: t('front-desk.rooms.status.overdue'), value: 'overdue' }
@@ -138,6 +153,13 @@ function resolveFeedbackMessage(message) {
         <div class="filter-control"><label>{{ t('front-desk.rooms.state') }}</label><pv-select v-model="statusFilter" :options="statusFilterOptions" option-label="label" option-value="value" /></div>
       </div>
 
+      <section class="admin-room-status-legend" :aria-label="t('front-desk.rooms.state')">
+        <span v-for="item in statusLegend" :key="item.status" class="admin-room-legend-item" :class="item.status">
+          <i :class="item.icon"></i>
+          {{ t('front-desk.rooms.status.' + toI18nKey(item.status)) }}
+        </span>
+      </section>
+
       <div class="admin-room-list">
         <article v-for="room in filteredRooms" :key="room.id" class="admin-room-row">
           <div>
@@ -146,10 +168,11 @@ function resolveFeedbackMessage(message) {
           </div>
           <div class="status-control-block">
             <template v-if="room.stayId">
-              <span class="status-badge locked-status" :class="room.runtimeStatus">{{ t('front-desk.rooms.status.' + toI18nKey(room.runtimeStatus)) }}</span>
+              <span class="status-badge room-status-badge locked-status" :class="room.runtimeStatus"><i :class="getRoomStatusIcon(room.runtimeStatus)"></i>{{ t('front-desk.rooms.status.' + toI18nKey(room.runtimeStatus)) }}</span>
               <small class="locked-status-note">{{ t('admin.rooms.status-locked') }}</small>
             </template>
             <label v-else class="compact-select-label">
+              <span class="status-badge room-status-badge" :class="room.runtimeStatus"><i :class="getRoomStatusIcon(room.runtimeStatus)"></i>{{ t('front-desk.rooms.status.' + toI18nKey(room.runtimeStatus)) }}</span>
               <span>{{ t('admin.rooms.update-status') }}</span>
               <pv-select
                 :model-value="room.status"
@@ -173,7 +196,7 @@ function resolveFeedbackMessage(message) {
               <div class="form-field"><label>{{ t('admin.rooms.type') }}</label><pv-select v-model="editForm.type" :options="roomTypeOptions" option-label="label" option-value="value" /></div>
               <div class="form-field"><label>{{ t('admin.rooms.capacity') }}</label><pv-input-number v-model="editForm.capacity" :min="1" :use-grouping="false" /></div>
               <div class="form-field"><label>{{ t('admin.rooms.price-per-hour-currency') }}</label><pv-input-number v-model="editForm.pricePerHour" prefix="S/ " :min="1" :min-fraction-digits="2" :max-fraction-digits="2" /></div>
-              <div class="form-field" style="justify-content:end;">
+              <div class="form-field submit-field">
                 <div class="actions-row">
                   <button class="success-button" type="button" @click="saveEdit(room)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>
                   <button class="ghost-button" type="button" @click="cancelEdit">{{ t('shared.actions.cancel') }}</button>
@@ -188,6 +211,51 @@ function resolveFeedbackMessage(message) {
 </template>
 
 <style scoped>
+.admin-room-status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+}
+
+.admin-room-legend-item,
+.room-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.admin-room-legend-item {
+  min-height: 32px;
+  padding: 0.42rem 0.68rem;
+  font-size: 0.77rem;
+}
+
+.room-status-badge {
+  width: fit-content;
+  min-height: 28px;
+  padding: 0.38rem 0.62rem;
+}
+
+.room-status-badge.available,
+.admin-room-legend-item.available { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+.room-status-badge.occupied,
+.admin-room-legend-item.occupied { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+.room-status-badge.endingSoon,
+.admin-room-legend-item.endingSoon { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+.room-status-badge.cleaning,
+.admin-room-legend-item.cleaning { background: #ccfbf1; color: #0f766e; border: 1px dashed #14b8a6; }
+.room-status-badge.maintenance,
+.admin-room-legend-item.maintenance { background: #f1f5f9; color: #475569; border: 1px solid #94a3b8; }
+.room-status-badge.overdue,
+.admin-room-legend-item.overdue { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.submit-field {
+  justify-content: end;
+}
+
 .admin-room-form-card,
 .registered-rooms-panel {
   margin-bottom: 1.25rem;

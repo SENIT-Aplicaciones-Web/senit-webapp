@@ -163,7 +163,7 @@ function resolveFeedbackMessage(message) {
           </div>
         </div>
 
-        <div class="panel-card" style="margin-top: 1rem; box-shadow:none;">
+        <div class="panel-card check-in-summary-card">
           <h3>{{ t('front-desk.check-in.summary') }}</h3>
           <p><strong>{{ t('front-desk.check-in.price-per-hour') }}:</strong> S/ {{ selectedRoom ? selectedRoom.pricePerHour.toFixed(2) : '0.00' }}</p>
           <p><strong>{{ t('front-desk.check-in.checkout-limit') }}:</strong> {{ checkoutLimit }}</p>
@@ -171,7 +171,7 @@ function resolveFeedbackMessage(message) {
         </div>
 
         <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
-        <button class="primary-button" type="submit" style="width: 100%; margin-top: 1rem;"><i class="pi pi-check"></i>{{ t('front-desk.check-in.submit') }}</button>
+        <button class="primary-button check-in-submit-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.check-in.submit') }}</button>
       </section>
     </form>
 
@@ -183,3 +183,16 @@ function resolveFeedbackMessage(message) {
     </section>
   </section>
 </template>
+
+
+<style scoped>
+.check-in-summary-card {
+  margin-top: 1rem;
+  box-shadow: none;
+}
+
+.check-in-submit-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+</style>

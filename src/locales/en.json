@@ -29,7 +29,15 @@
     "register": "Register",
     "back": "Back",
     "toggle-password": "Show or hide password",
-    "admin-owner-notice": "This registration is only for hotel administrators or owners. If you are staff, request access from your hotel administrator."
+    "admin-owner-notice": "This registration is only for hotel administrators or owners. If you are staff, request access from your hotel administrator.",
+    "reset-password-title": "Recover password",
+    "reset-password-subtitle": "Enter your email and set a new password.",
+    "new-password": "New password",
+    "confirm-password": "Confirm password",
+    "reset-password": "Update password",
+    "passwords-do-not-match": "Passwords do not match.",
+    "password-reset-successfully": "Password updated successfully. Sign in with your new password.",
+    "recovery-user-not-found": "No account was found with that email or the password is invalid."
   },
   "dashboard": {
     "title": "Main dashboard",
@@ -372,7 +380,8 @@
         "phone": "9 digits",
         "email": "email{'@'}domain.com",
         "guests-quantity": "E.g. 2"
-      }
+      },
+      "capacity": "Capacity {capacity}"
     },
     "navigation": {
       "reception": "Front desk",
@@ -480,7 +489,13 @@
       "overlapping-booking": "There is already an overlapping reservation or stay for this room.",
       "reservation-payment-error": "The reservation guarantee payment could not be calculated.",
       "room-not-available": "The selected room is not available.",
-      "duration-whole-hours": "Duration must be in whole hours."
+      "duration-whole-hours": "Duration must be in whole hours.",
+      "valid-guest-name": "Enter a valid name from 3 to 80 characters.",
+      "valid-dni": "Enter a valid 8-digit ID number.",
+      "valid-phone": "Enter a valid 9-digit phone number.",
+      "valid-email": "Enter a valid email address.",
+      "valid-guests-quantity": "Enter a guests quantity greater than 0.",
+      "guests-exceed-capacity": "The number of guests exceeds the room capacity: {capacity}."
     }
   },
   "admin": {

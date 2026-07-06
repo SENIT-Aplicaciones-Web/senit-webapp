@@ -37,7 +37,9 @@ const filteredPayments = computed(() => {
   const start = fromDate.value ? new Date(`${fromDate.value}T00:00:00`).getTime() : 0
   const end = toDate.value ? new Date(`${toDate.value}T23:59:59`).getTime() : Date.now()
   return operationsStore.payments.filter(payment => {
+    if (payment.subscriptionId || payment.plan) return false
     if (payment.status !== 'completed' || !paymentBelongsToActiveHotel(payment)) return false
+    if (Number(payment.amount) <= 0) return false
     const paidAt = new Date(payment.paidAt).getTime()
     return !Number.isNaN(paidAt) && paidAt >= start && paidAt <= end
   })
@@ -124,17 +126,16 @@ function getRevenueGroupStart(date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
 
-function createEmptyRevenueGroups() {
-  const start = getRevenueGroupStart(getHotelRevenueStartDate())
-  const end = getRevenueGroupStart(getRevenueEndDate())
+function createRevenueGroupsFromPayments() {
   const groups = new Map()
-  let cursor = new Date(start)
 
-  while (cursor.getTime() <= end.getTime()) {
-    const group = createRevenueGroup(cursor)
-    groups.set(group.key, { label: group.label, value: 0 })
-    cursor = addDateUnit(cursor, revenueRangeMode.value)
-  }
+  filteredPayments.value.forEach(payment => {
+    const paymentDate = new Date(payment.paidAt)
+    if (Number.isNaN(paymentDate.getTime())) return
+    const group = createRevenueGroup(paymentDate)
+    const currentValue = groups.get(group.key)?.value ?? 0
+    groups.set(group.key, { label: group.label, value: currentValue + Number(payment.amount) })
+  })
 
   return groups
 }
@@ -181,20 +182,17 @@ function exportRevenueReport() {
 }
 
 const revenueBars = computed(() => {
-  const grouped = createEmptyRevenueGroups()
-
-  filteredPayments.value.forEach(payment => {
-    const paymentDate = new Date(payment.paidAt)
-    if (Number.isNaN(paymentDate.getTime())) return
-    const group = createRevenueGroup(paymentDate)
-    const currentValue = grouped.get(group.key)?.value ?? 0
-    grouped.set(group.key, { label: group.label, value: currentValue + Number(payment.amount) })
-  })
+  const grouped = createRevenueGroupsFromPayments()
 
   return Array.from(grouped.entries())
     .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey))
-    .map(([, group]) => group)
+    .map(([, group]) => ({ ...group, value: Number(group.value) }))
+    .filter(group => group.value > 0)
 })
+
+function chartBarClass(value) {
+  return `bar-height-${chartBarHeight(value)}`
+}
 
 function resolveFeedbackMessage(message) {
   return /^[a-z0-9.-]+$/.test(message ?? '') ? t(message) : message
@@ -225,8 +223,20 @@ function resolveFeedbackMessage(message) {
           <p class="help-message">{{ t('admin.dashboard.revenue-by-date-description') }}</p>
         </div>
         <div class="revenue-filters">
-          <div class="form-field"><label>{{ t('admin.dashboard.from-date') }}</label><input v-model="fromDate" type="date" /></div>
-          <div class="form-field"><label>{{ t('admin.dashboard.to-date') }}</label><input v-model="toDate" type="date" /></div>
+          <div class="form-field">
+            <label for="revenueFromDate">{{ t('admin.dashboard.from-date') }}</label>
+            <div class="date-input-wrapper">
+              <input id="revenueFromDate" v-model="fromDate" type="date" />
+              <i class="pi pi-calendar"></i>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="revenueToDate">{{ t('admin.dashboard.to-date') }}</label>
+            <div class="date-input-wrapper">
+              <input id="revenueToDate" v-model="toDate" type="date" />
+              <i class="pi pi-calendar"></i>
+            </div>
+          </div>
         </div>
       </div>
       <div v-if="revenueBars.length" class="revenue-classic-chart" :aria-label="t('admin.dashboard.revenue-by-date')">
@@ -240,9 +250,11 @@ function resolveFeedbackMessage(message) {
           <div class="chart-grid-line line-25"></div>
           <div class="chart-bars">
             <article v-for="bar in revenueBars" :key="bar.label" class="chart-bar-item">
-              <div class="chart-bar-track" :style="{ '--bar-height': `${chartBarHeight(bar.value)}%` }">
-                <div v-if="bar.value > 0" class="chart-bar-value">S/ {{ bar.value.toFixed(2) }}</div>
-                <div class="chart-bar-column" :class="{ zero: bar.value <= 0 }"></div>
+              <div class="chart-bar-track">
+                <div class="chart-bar-value">S/ {{ bar.value.toFixed(2) }}</div>
+                <div class="chart-bar-frame">
+                  <div class="chart-bar-column" :class="chartBarClass(bar.value)"></div>
+                </div>
               </div>
               <div class="chart-bar-label">{{ bar.label }}</div>
             </article>
@@ -277,6 +289,25 @@ function resolveFeedbackMessage(message) {
 .revenue-header { align-items: flex-start; }
 .revenue-filters { display: flex; gap: 0.8rem; flex-wrap: wrap; }
 .revenue-filters .form-field { min-width: 170px; }
+.date-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.date-input-wrapper input {
+  width: 100%;
+  padding-right: 2.6rem;
+}
+.date-input-wrapper i {
+  position: absolute;
+  right: 0.85rem;
+  color: #1e3a8a;
+  pointer-events: none;
+}
+.date-input-wrapper input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
 .revenue-classic-chart {
   display: grid;
   grid-template-columns: 72px minmax(0, 1fr);
@@ -290,7 +321,7 @@ function resolveFeedbackMessage(message) {
   flex-direction: column;
   justify-content: space-between;
   height: 220px;
-  margin-top: 0.75rem;
+  margin-top: 2.65rem;
   padding: 0;
   color: #64748b;
   font-size: 0.78rem;
@@ -300,8 +331,8 @@ function resolveFeedbackMessage(message) {
   position: relative;
   min-width: 0;
   border-left: 1px solid #cbd5e1;
-  padding: 0.75rem 0.75rem 0;
-  overflow-x: auto;
+  padding: 2.65rem 0.75rem 0;
+  overflow-x: hidden;
 }
 .chart-grid-line {
   position: absolute;
@@ -310,19 +341,19 @@ function resolveFeedbackMessage(message) {
   height: 1px;
   background: #eef4ff;
 }
-.line-100 { top: 0.75rem; }
-.line-75 { top: calc(0.75rem + 55px); }
-.line-50 { top: calc(0.75rem + 110px); }
-.line-25 { top: calc(0.75rem + 165px); }
+.line-100 { top: 2.65rem; }
+.line-75 { top: calc(2.65rem + 55px); }
+.line-50 { top: calc(2.65rem + 110px); }
+.line-25 { top: calc(2.65rem + 165px); }
 .chart-bars {
   position: relative;
   z-index: 1;
-  min-width: 360px;
+  width: 100%;
+  min-width: 0;
   height: calc(220px + 2.1rem);
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(86px, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: clamp(0.45rem, 1.5vw, 1rem);
   align-items: stretch;
   padding-bottom: 2.1rem;
 }
@@ -342,50 +373,154 @@ function resolveFeedbackMessage(message) {
   display: grid;
   grid-template-rows: 220px 2.1rem;
   justify-items: center;
+  min-width: 0;
 }
 .chart-bar-track {
-  position: relative;
   width: 100%;
   min-height: 0;
+  display: grid;
+  grid-template-rows: 2.2rem 1fr;
+  justify-items: center;
+}
+.chart-bar-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
 }
 .chart-bar-value {
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--bar-height, 0%) + 0.45rem);
-  transform: translateX(-50%);
   color: #1e3a8a;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 650;
   white-space: nowrap;
+  align-self: end;
+  padding-bottom: 0.35rem;
 }
 .chart-bar-column {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: min(54px, 80%);
-  height: var(--bar-height, 0%);
-  transform: translateX(-50%);
+  width: min(54px, 76%);
+  min-height: 3px;
   border-radius: 12px 12px 0 0;
   background: linear-gradient(180deg, #2563eb, #35b98f);
   box-shadow: 0 10px 18px rgba(37, 99, 235, 0.14);
 }
-.chart-bar-column.zero {
-  height: 4px;
-  background: #ffffff;
-  border: 1px solid #dbe6f5;
-  box-shadow: none;
-}
+.bar-height-0 { height: 0%; }
+.bar-height-1 { height: 1%; }
+.bar-height-2 { height: 2%; }
+.bar-height-3 { height: 3%; }
+.bar-height-4 { height: 4%; }
+.bar-height-5 { height: 5%; }
+.bar-height-6 { height: 6%; }
+.bar-height-7 { height: 7%; }
+.bar-height-8 { height: 8%; }
+.bar-height-9 { height: 9%; }
+.bar-height-10 { height: 10%; }
+.bar-height-11 { height: 11%; }
+.bar-height-12 { height: 12%; }
+.bar-height-13 { height: 13%; }
+.bar-height-14 { height: 14%; }
+.bar-height-15 { height: 15%; }
+.bar-height-16 { height: 16%; }
+.bar-height-17 { height: 17%; }
+.bar-height-18 { height: 18%; }
+.bar-height-19 { height: 19%; }
+.bar-height-20 { height: 20%; }
+.bar-height-21 { height: 21%; }
+.bar-height-22 { height: 22%; }
+.bar-height-23 { height: 23%; }
+.bar-height-24 { height: 24%; }
+.bar-height-25 { height: 25%; }
+.bar-height-26 { height: 26%; }
+.bar-height-27 { height: 27%; }
+.bar-height-28 { height: 28%; }
+.bar-height-29 { height: 29%; }
+.bar-height-30 { height: 30%; }
+.bar-height-31 { height: 31%; }
+.bar-height-32 { height: 32%; }
+.bar-height-33 { height: 33%; }
+.bar-height-34 { height: 34%; }
+.bar-height-35 { height: 35%; }
+.bar-height-36 { height: 36%; }
+.bar-height-37 { height: 37%; }
+.bar-height-38 { height: 38%; }
+.bar-height-39 { height: 39%; }
+.bar-height-40 { height: 40%; }
+.bar-height-41 { height: 41%; }
+.bar-height-42 { height: 42%; }
+.bar-height-43 { height: 43%; }
+.bar-height-44 { height: 44%; }
+.bar-height-45 { height: 45%; }
+.bar-height-46 { height: 46%; }
+.bar-height-47 { height: 47%; }
+.bar-height-48 { height: 48%; }
+.bar-height-49 { height: 49%; }
+.bar-height-50 { height: 50%; }
+.bar-height-51 { height: 51%; }
+.bar-height-52 { height: 52%; }
+.bar-height-53 { height: 53%; }
+.bar-height-54 { height: 54%; }
+.bar-height-55 { height: 55%; }
+.bar-height-56 { height: 56%; }
+.bar-height-57 { height: 57%; }
+.bar-height-58 { height: 58%; }
+.bar-height-59 { height: 59%; }
+.bar-height-60 { height: 60%; }
+.bar-height-61 { height: 61%; }
+.bar-height-62 { height: 62%; }
+.bar-height-63 { height: 63%; }
+.bar-height-64 { height: 64%; }
+.bar-height-65 { height: 65%; }
+.bar-height-66 { height: 66%; }
+.bar-height-67 { height: 67%; }
+.bar-height-68 { height: 68%; }
+.bar-height-69 { height: 69%; }
+.bar-height-70 { height: 70%; }
+.bar-height-71 { height: 71%; }
+.bar-height-72 { height: 72%; }
+.bar-height-73 { height: 73%; }
+.bar-height-74 { height: 74%; }
+.bar-height-75 { height: 75%; }
+.bar-height-76 { height: 76%; }
+.bar-height-77 { height: 77%; }
+.bar-height-78 { height: 78%; }
+.bar-height-79 { height: 79%; }
+.bar-height-80 { height: 80%; }
+.bar-height-81 { height: 81%; }
+.bar-height-82 { height: 82%; }
+.bar-height-83 { height: 83%; }
+.bar-height-84 { height: 84%; }
+.bar-height-85 { height: 85%; }
+.bar-height-86 { height: 86%; }
+.bar-height-87 { height: 87%; }
+.bar-height-88 { height: 88%; }
+.bar-height-89 { height: 89%; }
+.bar-height-90 { height: 90%; }
+.bar-height-91 { height: 91%; }
+.bar-height-92 { height: 92%; }
+.bar-height-93 { height: 93%; }
+.bar-height-94 { height: 94%; }
+.bar-height-95 { height: 95%; }
+.bar-height-96 { height: 96%; }
+.bar-height-97 { height: 97%; }
+.bar-height-98 { height: 98%; }
+.bar-height-99 { height: 99%; }
+.bar-height-100 { height: 100%; }
 .chart-bar-label {
   align-self: center;
+  max-width: 100%;
   color: #475569;
   font-size: 0.78rem;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding-top: 0.25rem;
 }
 .compact-empty { padding: 1rem; }
 @media (max-width: 760px) {
   .revenue-classic-chart { grid-template-columns: 54px minmax(0, 1fr); }
   .chart-y-axis { font-size: 0.7rem; }
-  .chart-bars { grid-auto-columns: 74px; }
+  .chart-bars { grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); }
+  .chart-bar-value { font-size: 0.68rem; }
 }
 </style>

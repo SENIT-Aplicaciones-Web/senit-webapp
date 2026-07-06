@@ -29,7 +29,15 @@
     "register": "Registrar",
     "back": "Volver",
     "toggle-password": "Mostrar u ocultar contraseña",
-    "admin-owner-notice": "Este registro es solo para administradores o dueños del hotel. Si eres trabajador, solicita acceso al administrador de tu establecimiento."
+    "admin-owner-notice": "Este registro es solo para administradores o dueños del hotel. Si eres trabajador, solicita acceso al administrador de tu establecimiento.",
+    "reset-password-title": "Recuperar contraseña",
+    "reset-password-subtitle": "Ingresa tu correo y define una nueva contraseña.",
+    "new-password": "Nueva contraseña",
+    "confirm-password": "Confirmar contraseña",
+    "reset-password": "Actualizar contraseña",
+    "passwords-do-not-match": "Las contraseñas no coinciden.",
+    "password-reset-successfully": "Contraseña actualizada correctamente. Inicia sesión con tu nueva contraseña.",
+    "recovery-user-not-found": "No se encontró una cuenta con ese correo o la contraseña no es válida."
   },
   "dashboard": {
     "title": "Panel principal",
@@ -372,7 +380,8 @@
         "phone": "9 dígitos",
         "email": "correo{'@'}dominio.com",
         "guests-quantity": "Ej. 2"
-      }
+      },
+      "capacity": "Capacidad {capacity}"
     },
     "navigation": {
       "reception": "Recepción",
@@ -480,7 +489,13 @@
       "overlapping-booking": "Ya existe una reserva o estadía superpuesta para esta habitación.",
       "reservation-payment-error": "No se pudo calcular el pago de garantía.",
       "room-not-available": "La habitación seleccionada no está disponible.",
-      "duration-whole-hours": "La duración debe ser en horas enteras."
+      "duration-whole-hours": "La duración debe ser en horas enteras.",
+      "valid-guest-name": "Ingrese un nombre válido de 3 a 80 caracteres.",
+      "valid-dni": "Ingrese un DNI válido de 8 dígitos.",
+      "valid-phone": "Ingrese un teléfono válido de 9 dígitos.",
+      "valid-email": "Ingrese un correo electrónico válido.",
+      "valid-guests-quantity": "Ingrese una cantidad de huéspedes mayor a 0.",
+      "guests-exceed-capacity": "La cantidad de huéspedes supera la capacidad de la habitación: {capacity}."
     }
   },
   "admin": {

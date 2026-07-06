@@ -490,7 +490,6 @@ button.result-item {
 }
 button.result-item:hover { background: #f8fbff; border-color: #bfdbfe; }
 
-/* Visual refinements aligned with the original reception dashboard style. */
 .app-shell {
   grid-template-columns: 260px minmax(0, 1fr);
 }
@@ -903,7 +902,6 @@ table.data-table.compact-table {
   }
 }
 
-/* v10 visual consistency pass */
 .summary-grid.compact-summary-grid {
   grid-template-columns: repeat(4, minmax(170px, 1fr));
 }
@@ -1305,7 +1303,6 @@ input[type="number"] {
   justify-content: center;
 }
 
-/* v11 visual cleanup: lighter typography, consistent cards, clearer states. */
 :root {
   --senit-ink: #183a8f;
   --senit-soft-blue: #eef5ff;
@@ -1735,7 +1732,6 @@ button,
   .room-tile { width: 100%; }
 }
 
-/* Global shell tokens only: component-specific refinements live in scoped blocks. */
 body {
   font-weight: 400;
 }
@@ -1787,7 +1783,6 @@ select,
   font-weight: 400 !important;
 }
 
-/* v13 polish: remove nested input borders, keep sidebar and content stable, and normalize PrimeVue selects. */
 html, body, #app {
   height: auto;
   min-height: 100%;
@@ -1887,7 +1882,6 @@ html, body, #app {
   color: #1e3a8a !important;
 }
 
-/* v14 final polish: light scrollbars, uncut select arrows, stable controls. */
 html {
   scrollbar-color: #cbd5e1 #eef4ff;
 }
@@ -1952,7 +1946,6 @@ body::-webkit-scrollbar-thumb,
   border: 1px solid #dbe3ef;
 }
 
-/* v15 polish: light scrollbars and stable native select arrows. */
 * {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #eef4ff;
@@ -1989,7 +1982,6 @@ body::-webkit-scrollbar-thumb,
   border-right-color: #dbe3ef;
 }
 
-/* v18 responsive shell: mobile sidebar drawer and compact controls. */
 .mobile-sidebar-button {
   display: none;
   position: fixed;
@@ -2107,7 +2099,6 @@ body::-webkit-scrollbar-thumb,
 }
 
 
-/* v19 branding and mobile stability */
 .brand,
 .page-header h1,
 .panel-header h2,
@@ -2187,7 +2178,6 @@ body::-webkit-scrollbar-thumb,
   }
 }
 
-/* v20 final responsive and typography cleanup */
 :root,
 body,
 input,
@@ -2391,7 +2381,6 @@ body,
   }
 }
 
-/* v20 final shell and chart grounding fixes */
 @media (min-width: 901px) {
   .app-shell {
     grid-template-columns: 280px minmax(0, 1fr);
@@ -2426,7 +2415,6 @@ body,
 }
 
 
-/* v21 sidebar and chart final fixes */
 @media (min-width: 901px) {
   .app-shell {
     display: block;

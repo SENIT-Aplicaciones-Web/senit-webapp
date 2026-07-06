@@ -143,7 +143,7 @@ function resolveFeedbackMessage(message) {
               <div class="form-field"><label>{{ t('admin.staff.email') }}</label><pv-input-text v-model="editForm.email" /></div>
               <div class="form-field"><label>{{ t('admin.staff.role') }}</label><pv-select v-model="editForm.role" :options="roleOptions" option-label="label" option-value="value" /></div>
               <div class="form-field"><label>{{ t('admin.staff.optional-password') }}</label><pv-input-text v-model="editForm.password" /></div>
-              <div class="form-field" style="justify-content:end;">
+              <div class="form-field submit-field">
                 <div class="actions-row">
                   <button class="success-button" type="button" @click="saveEdit(user)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>
                   <button class="ghost-button" type="button" @click="cancelEdit">{{ t('shared.actions.cancel') }}</button>
@@ -158,6 +158,10 @@ function resolveFeedbackMessage(message) {
 </template>
 
 <style scoped>
+.submit-field {
+  justify-content: end;
+}
+
 .admin-staff-form {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }

@@ -15,6 +15,11 @@ onMounted(() => iamStore.clearMessages())
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const isRecoveringPassword = ref(false)
+const recoveryEmail = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const showNewPassword = ref(false)
 
 async function onSignIn() {
   const command = new SignInCommand({
@@ -28,6 +33,47 @@ async function onSignIn() {
     router.push(iamStore.currentUser?.role === 'ADMIN'
         ? { name: 'admin-dashboard' }
         : { name: 'front-desk-dashboard' })
+  }
+}
+
+function openPasswordRecovery() {
+  iamStore.clearMessages()
+  recoveryEmail.value = email.value
+  newPassword.value = ''
+  confirmPassword.value = ''
+  isRecoveringPassword.value = true
+}
+
+function backToSignIn() {
+  iamStore.clearMessages()
+  isRecoveringPassword.value = false
+}
+
+async function onResetPassword() {
+  iamStore.clearMessages()
+
+  if (!recoveryEmail.value || !recoveryEmail.value.includes('@')) {
+    iamStore.errors.push(new Error('auth.validation-email'))
+    return
+  }
+
+  if (!newPassword.value || newPassword.value.length < 6) {
+    iamStore.errors.push(new Error('auth.validation-password'))
+    return
+  }
+
+  if (newPassword.value !== confirmPassword.value) {
+    iamStore.errors.push(new Error('auth.passwords-do-not-match'))
+    return
+  }
+
+  const success = await iamStore.resetPassword(recoveryEmail.value, newPassword.value)
+  if (success) {
+    email.value = recoveryEmail.value
+    password.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+    isRecoveringPassword.value = false
   }
 }
 
@@ -45,7 +91,7 @@ function goToSignUp() {
         <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
         <p class="brand-tagline">{{ t('brand.tagline') }}</p><br>
 
-        <h2>{{t('credentials.demo')}}</h2>
+        <h2>{{ t('credentials.demo') }}</h2>
         <h2>admin@admin.com / 123456</h2>
         <h2>recepcion@recepcion.com / 12345</h2>
       </div>
@@ -55,36 +101,81 @@ function goToSignUp() {
 
     <section class="form-section">
       <div class="auth-card">
-        <h2>{{ t('auth.sign-in-title') }}</h2>
-        <p class="subtitle">{{ t('auth.sign-in-subtitle') }}</p>
+        <template v-if="!isRecoveringPassword">
+          <h2>{{ t('auth.sign-in-title') }}</h2>
+          <p class="subtitle">{{ t('auth.sign-in-subtitle') }}</p>
 
-        <form @submit.prevent="onSignIn">
-          <label for="email">{{ t('auth.email') }}</label>
-          <span class="auth-input-icon">
-            <i class="pi pi-envelope"></i>
-            <pv-input-text id="email" v-model="email" type="email" class="auth-input" />
-          </span>
+          <form @submit.prevent="onSignIn">
+            <label for="email">{{ t('auth.email') }}</label>
+            <span class="auth-input-icon">
+              <i class="pi pi-envelope"></i>
+              <pv-input-text id="email" v-model="email" type="email" class="auth-input" />
+            </span>
 
-          <label for="password">{{ t('auth.password') }}</label>
-          <span class="auth-input-icon">
-            <i class="pi pi-lock"></i>
-            <pv-input-text id="password" v-model="password" :type="showPassword ? 'text' : 'password'" class="auth-input" />
-            <button class="password-toggle" type="button" :aria-label="t('auth.toggle-password')" @click="showPassword = !showPassword"><i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i></button>
-          </span>
+            <label for="password">{{ t('auth.password') }}</label>
+            <span class="auth-input-icon">
+              <i class="pi pi-lock"></i>
+              <pv-input-text id="password" v-model="password" :type="showPassword ? 'text' : 'password'" class="auth-input" />
+              <button class="password-toggle" type="button" :aria-label="t('auth.toggle-password')" @click="showPassword = !showPassword">
+                <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              </button>
+            </span>
 
+            <button class="forgot-link" type="button" @click="openPasswordRecovery">
+              {{ t('auth.forgot-password') }}
+            </button>
 
-          <p v-if="iamStore.errors.length" class="error-message">
-            {{ t(iamStore.errors[0].message) }}
-          </p>
+            <p v-if="iamStore.errors.length" class="error-message">
+              {{ t(iamStore.errors[0].message) }}
+            </p>
 
-          <div class="button-row">
-            <pv-button :label="t('auth.sign-in')" type="submit" class="auth-button" />
-            <pv-button :label="t('auth.sign-up')" type="button" class="auth-button" @click="goToSignUp" />
-          </div>
+            <p v-if="iamStore.successMessage" class="success-message">
+              {{ t(iamStore.successMessage) }}
+            </p>
 
-          
-          
-        </form>
+            <div class="button-row">
+              <pv-button :label="t('auth.sign-in')" type="submit" class="auth-button" />
+              <pv-button :label="t('auth.sign-up')" type="button" class="auth-button" @click="goToSignUp" />
+            </div>
+          </form>
+        </template>
+
+        <template v-else>
+          <h2>{{ t('auth.reset-password-title') }}</h2>
+          <p class="subtitle">{{ t('auth.reset-password-subtitle') }}</p>
+
+          <form @submit.prevent="onResetPassword">
+            <label for="recovery-email">{{ t('auth.email') }}</label>
+            <span class="auth-input-icon">
+              <i class="pi pi-envelope"></i>
+              <pv-input-text id="recovery-email" v-model="recoveryEmail" type="email" class="auth-input" />
+            </span>
+
+            <label for="new-password">{{ t('auth.new-password') }}</label>
+            <span class="auth-input-icon">
+              <i class="pi pi-lock"></i>
+              <pv-input-text id="new-password" v-model="newPassword" :type="showNewPassword ? 'text' : 'password'" class="auth-input" />
+              <button class="password-toggle" type="button" :aria-label="t('auth.toggle-password')" @click="showNewPassword = !showNewPassword">
+                <i :class="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              </button>
+            </span>
+
+            <label for="confirm-password">{{ t('auth.confirm-password') }}</label>
+            <span class="auth-input-icon">
+              <i class="pi pi-lock"></i>
+              <pv-input-text id="confirm-password" v-model="confirmPassword" :type="showNewPassword ? 'text' : 'password'" class="auth-input" />
+            </span>
+
+            <p v-if="iamStore.errors.length" class="error-message">
+              {{ t(iamStore.errors[0].message) }}
+            </p>
+
+            <div class="button-row">
+              <pv-button :label="t('auth.reset-password')" type="submit" class="auth-button" />
+              <pv-button :label="t('auth.back')" type="button" class="auth-button secondary-auth-button" @click="backToSignIn" />
+            </div>
+          </form>
+        </template>
       </div>
     </section>
 
@@ -245,6 +336,11 @@ label {
   margin: 0.7rem 0 1.8rem;
   padding: 0;
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.forgot-link:hover {
+  color: #60a5fa;
 }
 
 .button-row {
@@ -265,8 +361,17 @@ label {
   color: #ffffff !important;
 }
 
+.secondary-auth-button.p-button {
+  background: #64748b !important;
+}
+
 .error-message {
   color: #dc2626;
+  margin: 0 0 1rem;
+}
+
+.success-message {
+  color: #16a34a;
   margin: 0 0 1rem;
 }
 

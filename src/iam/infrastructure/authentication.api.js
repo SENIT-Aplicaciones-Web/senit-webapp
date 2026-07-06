@@ -57,6 +57,20 @@ export class AuthenticationApi {
     }
   }
 
+
+  static async resetPassword(email, newPassword) {
+    try {
+      await api.http.post(`${authenticationPath}/reset-password`, {
+        email: normalizeEmail(email),
+        newPassword
+      })
+      return true
+    } catch (error) {
+      if ([400, 404].includes(getErrorStatus(error))) return false
+      throw error
+    }
+  }
+
   static async signUp(command) {
     try {
       const response = await api.http.post(`${authenticationPath}/sign-up`, {
@@ -108,6 +122,7 @@ export class AuthenticationApi {
       const currentUser = this.getCurrentUser()
 
       if (currentUser && sameId(currentUser.id, userId)) {
+        updatedUser.token = currentUser.token
         saveCurrentUser(updatedUser)
       }
 
@@ -131,6 +146,8 @@ export class AuthenticationApi {
       status: user.status
     })
     const updatedUser = UserAssembler.toEntity(updatedResponse.data)
+    const currentUser = this.getCurrentUser()
+    updatedUser.token = currentUser?.token ?? ''
     saveCurrentUser(updatedUser)
     return updatedUser
   }
@@ -148,5 +165,6 @@ export class AuthenticationApi {
 
   static signOut() {
     localStorage.removeItem(CURRENT_USER_KEY)
+    localStorage.removeItem('senit-webapp-last-access')
   }
 }

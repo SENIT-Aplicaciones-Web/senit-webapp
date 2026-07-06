@@ -86,7 +86,7 @@ function resolveFeedbackMessage(message) {
           <div class="result-item"><span><strong>{{ t('front-desk.stay-details.status') }}</strong><small>{{ t('front-desk.payment-status.' + toI18nKey(stay.paymentStatus)) }}</small></span><span class="status-badge" :class="stay.paymentStatus === 'paid' ? 'paid' : 'pending'">{{ t('front-desk.payment-status.' + toI18nKey(stay.paymentStatus)) }}</span></div>
           <div class="result-item"><span><strong>{{ t('front-desk.stay-details.total') }}</strong><small>{{ t('front-desk.stay-details.amount-description') }}</small></span><strong>S/ {{ stay.total.toFixed(2) }}</strong></div>
         </div>
-        <button class="success-button" type="button" style="width:100%; margin-top:1rem;" :disabled="stay.status === 'finished'" @click="goToCheckout"><i class="pi pi-arrow-right"></i>{{ t('front-desk.stay-details.go-checkout') }}</button>
+        <button class="success-button full-action-button" type="button" :disabled="stay.status === 'finished'" @click="goToCheckout"><i class="pi pi-arrow-right"></i>{{ t('front-desk.stay-details.go-checkout') }}</button>
       </article>
     </section>
 
@@ -97,11 +97,11 @@ function resolveFeedbackMessage(message) {
       </div>
 
       <p v-if="!canModifyConsumptions" class="help-message">{{ t('front-desk.checkout.paid-consumption-locked') }}</p>
-      <form v-if="showConsumptionForm && canModifyConsumptions" class="form-grid" @submit.prevent="addConsumption" style="margin-bottom:1rem;">
+      <form v-if="showConsumptionForm && canModifyConsumptions" class="form-grid consumption-form" @submit.prevent="addConsumption">
         <div class="form-field"><label>{{ t('front-desk.stay-details.product-or-service') }}</label><input v-model="consumptionForm.description" type="text" :placeholder="t('front-desk.stay-details.consumption-placeholder')" /></div>
         <div class="form-field"><label>{{ t('front-desk.common.quantity') }}</label><input v-model.number="consumptionForm.quantity" min="1" type="number" /></div>
         <div class="form-field"><label>{{ t('front-desk.stay-details.unit-price') }}</label><input v-model.number="consumptionForm.unitPrice" min="0" step="0.1" type="number" /></div>
-        <div class="form-field" style="justify-content:end;"><button class="success-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
+        <div class="form-field submit-field"><button class="success-button" type="submit"><i class="pi pi-check"></i>{{ t('front-desk.stay-details.save-consumption') }}</button></div>
       </form>
       <p v-if="feedback.message" class="feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
 
@@ -124,3 +124,19 @@ function resolveFeedbackMessage(message) {
 
   <section v-else class="empty-state panel-card"><i class="pi pi-exclamation-triangle"></i><h2>{{ t('front-desk.stay-details.not-found') }}</h2><button class="secondary-button" @click="goBack">{{ t('shared.actions.back') }}</button></section>
 </template>
+
+
+<style scoped>
+.full-action-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.consumption-form {
+  margin-bottom: 1rem;
+}
+
+.submit-field {
+  justify-content: end;
+}
+</style>
