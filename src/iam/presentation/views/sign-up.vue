@@ -236,8 +236,8 @@ label {
 }
 
 .auth-input-icon .auth-input {
-  padding-left: 3rem !important;
-  padding-right: 3rem !important;
+  padding-left: 3rem;
+  padding-right: 3rem;
 }
 
 .password-toggle {
@@ -261,9 +261,9 @@ label {
   border-radius: 12px;
   font-size: 1.45rem;
   font-weight: 700;
-  background: #2563eb !important;
-  border: none !important;
-  color: #ffffff !important;
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
 }
 
 .success-message {
@@ -278,13 +278,13 @@ label {
 
 .secondary-auth-button,
 .secondary-auth-button.p-button {
-  background: #eef4ff !important;
-  border: 1px solid #bfdbfe !important;
-  color: #1e3a8a !important;
+  background: #eef4ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
 }
 
 .secondary-auth-button :deep(.p-button-label) {
-  color: #1e3a8a !important;
+  color: #1e3a8a;
 }
 
 footer {

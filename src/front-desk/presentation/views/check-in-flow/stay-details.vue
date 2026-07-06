@@ -311,7 +311,7 @@ function goBack() {
 }
 
 .pending {
-  color: #b45309 !important;
+  color: #b45309;
 }
 
 .payment-method {

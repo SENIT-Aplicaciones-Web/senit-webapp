@@ -283,15 +283,15 @@ function exit() {
 }
 
 .pending {
-  color: #b45309 !important;
+  color: #b45309;
 }
 
 .paid {
-  color: #15803d !important;
+  color: #15803d;
 }
 
 .total {
-  color: #1e3a8a !important;
+  color: #1e3a8a;
   font-size: 1.2rem;
 }
 

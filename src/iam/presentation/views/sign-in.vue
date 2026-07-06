@@ -93,7 +93,6 @@ function goToSignUp() {
 
         <h2>{{ t('credentials.demo') }}</h2>
         <h2>admin@admin.com / 123456</h2>
-        <h2>recepcion@recepcion.com / 123456</h2>
       </div>
     </section>
 
@@ -315,8 +314,8 @@ label {
 }
 
 .auth-input-icon .auth-input {
-  padding-left: 3rem !important;
-  padding-right: 3rem !important;
+  padding-left: 3rem;
+  padding-right: 3rem;
 }
 
 .password-toggle {
@@ -356,13 +355,13 @@ label {
   border-radius: 12px;
   font-size: 1.45rem;
   font-weight: 700;
-  background: #2563eb !important;
-  border: none !important;
-  color: #ffffff !important;
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
 }
 
 .secondary-auth-button.p-button {
-  background: #64748b !important;
+  background: #64748b;
 }
 
 .error-message {

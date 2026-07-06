@@ -410,7 +410,7 @@ function viewDetails(stay) {
 
 .amount {
   font-weight: 800;
-  color: #0f172a !important;
+  color: #0f172a;
 }
 
 .actions {

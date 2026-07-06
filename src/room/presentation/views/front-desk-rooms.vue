@@ -254,16 +254,16 @@ function resolveFeedbackMessage(message) {
 }
 
 .room-tile.occupied {
-  background: #eaf2ff !important;
+  background: #eaf2ff;
   border-color: #2563eb;
-  color: #0f172a !important;
+  color: #0f172a;
 }
 
 .room-tile.occupied .room-number,
 .room-tile.occupied .room-type,
 .room-tile.occupied .room-guest,
 .room-tile.occupied .room-status-text {
-  color: #1e3a8a !important;
+  color: #1e3a8a;
 }
 
 .room-tile.endingSoon {
@@ -320,21 +320,21 @@ function resolveFeedbackMessage(message) {
 
 <style scoped>
 .room-tile.occupied {
-  background: #eef5ff !important;
-  border-color: #2563eb !important;
-  color: #0f172a !important;
+  background: #eef5ff;
+  border-color: #2563eb;
+  color: #0f172a;
 }
 
 .room-tile.occupied .room-number,
 .room-tile.occupied .room-type,
 .room-tile.occupied .room-guest,
 .room-tile.occupied .room-status-text {
-  color: #0f172a !important;
+  color: #0f172a;
 }
 
 .room-tile.occupied .room-number,
 .room-tile.occupied .room-status-text {
-  color: #1d4ed8 !important;
+  color: #1d4ed8;
 }
 
 .room-tile-action,
@@ -368,43 +368,42 @@ function resolveFeedbackMessage(message) {
 
 <style scoped>
 .room-tile-grid {
-  grid-template-columns: repeat(auto-fill, 152px) !important;
+  grid-template-columns: repeat(auto-fill, 152px);
 }
 
 .room-tile {
-  width: 152px !important;
-  height: 174px !important;
-  min-height: 174px !important;
-  padding: 0.95rem !important;
+  width: 152px;
+  min-height: 244px;
+  padding: 0.95rem;
 }
 
 .room-tile.occupied,
 .room-tile.occupied:hover {
-  background: #eff6ff !important;
-  border-color: #2563eb !important;
-  color: #0f172a !important;
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #0f172a;
 }
 
 .room-tile.occupied .room-number,
 .room-tile.occupied .room-type,
 .room-tile.occupied .room-guest,
 .room-tile.occupied .room-status-text {
-  color: #0f172a !important;
+  color: #0f172a;
 }
 
 .room-tile.occupied .room-number,
 .room-tile.occupied .room-status-text {
-  color: #1d4ed8 !important;
+  color: #1d4ed8;
 }
 
 .room-tile.endingSoon {
-  background: #fffbeb !important;
-  border-color: #f59e0b !important;
+  background: #fffbeb;
+  border-color: #f59e0b;
 }
 
 .room-tile.maintenance {
-  background: #f8fafc !important;
-  border-color: #94a3b8 !important;
+  background: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .room-tile-action,
