@@ -556,7 +556,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
   function getAvailableRoomsForCheckIn(hours) {
     const stayHours = Number(hours)
     if (!Number.isInteger(stayHours) || stayHours < 1 || stayHours > 168) return []
-    return availableRooms.value
+    return hotelRooms.value.filter(room => room.status === 'available')
   }
 
   async function sendNotification({ title, message, type = 'info' }) {
