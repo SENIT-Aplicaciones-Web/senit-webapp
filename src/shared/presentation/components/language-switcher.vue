@@ -1,5 +1,5 @@
 <script setup>
-import { watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 defineProps({
@@ -9,17 +9,25 @@ defineProps({
   }
 })
 
-const { locale, availableLocales } = useI18n()
+const SUPPORTED_LOCALES = ['es', 'en']
+const { locale } = useI18n()
 
-watch(locale, value => {
-  localStorage.setItem('senit-webapp-locale', value)
-}, { immediate: true })
+const selectedLocale = computed({
+  get: () => SUPPORTED_LOCALES.includes(locale.value) ? locale.value : 'es',
+  set: value => {
+    if (!SUPPORTED_LOCALES.includes(value) || value === locale.value) return
+
+    locale.value = value
+    localStorage.setItem('senit-webapp-locale', value)
+  }
+})
 </script>
 
 <template>
   <pv-select-button
-      v-model="locale"
-      :options="availableLocales"
+      v-model="selectedLocale"
+      :options="SUPPORTED_LOCALES"
+      :allow-empty="false"
       class="language-switcher"
       :class="{ floating }"
   >
