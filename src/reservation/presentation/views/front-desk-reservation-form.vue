@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import useReservationsStore from '../../application/reservations.store.js'
@@ -25,8 +25,15 @@ const form = reactive({
 const errors = reactive({})
 const feedback = ref({ type: '', message: '' })
 
+function toDateInputValue(date) {
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return localDate.toISOString().slice(0, 10)
+}
+
+const todayDate = computed(() => toDateInputValue(new Date()))
 const startAt = computed(() => form.startDate && form.startTime ? `${form.startDate}T${form.startTime}:00` : '')
 const endAt = computed(() => form.endDate && form.endTime ? `${form.endDate}T${form.endTime}:00` : '')
+const availableRoomsForSchedule = computed(() => reservationsStore.getReservationAvailableRooms({ startAt: startAt.value, endAt: endAt.value }))
 const selectedRoom = computed(() => reservationsStore.rooms.find(room => String(room.id) === String(form.roomId)) ?? null)
 const selectedRoomCapacity = computed(() => Number(selectedRoom.value?.capacity ?? 0))
 const reservationHours = computed(() => {
@@ -38,6 +45,12 @@ const reservationHours = computed(() => {
   return Number.isInteger(hours) ? hours : 0
 })
 const reservationAmount = computed(() => Number((reservationHours.value * Number(selectedRoom.value?.pricePerHour ?? 0)).toFixed(2)))
+
+watch([startAt, endAt, () => form.roomId], () => {
+  if (!form.roomId) return
+  const roomStillAvailable = availableRoomsForSchedule.value.some(room => String(room.id) === String(form.roomId))
+  if (!roomStillAvailable) form.roomId = ''
+})
 
 function goBackToReservations() {
   router.push({ name: route.path.startsWith('/admin') ? 'admin-reservations' : 'front-desk-reservations' })
@@ -65,6 +78,11 @@ function validate() {
   if (selectedRoomCapacity.value && guestsQuantity > selectedRoomCapacity.value) { setError('guestsQuantity', t('front-desk.validation.guests-exceed-capacity', { capacity: selectedRoomCapacity.value })); valid = false }
   if (!form.startDate || !form.startTime) { setError('startAt', t('front-desk.reservation-form.start-date')); valid = false }
   if (!form.endDate || !form.endTime) { setError('endAt', t('front-desk.reservation-form.end-date')); valid = false }
+
+  if (form.startDate && form.startTime && new Date(startAt.value).getTime() < Date.now()) {
+    setError('startAt', t('front-desk.validation.start-in-past'))
+    valid = false
+  }
 
   if (valid) {
     const availability = reservationsStore.validateReservationAvailability({ roomId: form.roomId, startAt: startAt.value, endAt: endAt.value })
@@ -129,7 +147,7 @@ function resolveFeedbackMessage(message) {
             <label for="roomId">{{ t('front-desk.reservation-form.room') }}</label>
             <select id="roomId" v-model="form.roomId" :aria-invalid="Boolean(errors.roomId)">
               <option value="">{{ t('front-desk.reservation-form.select-room') }}</option>
-              <option v-for="room in reservationsStore.rooms" :key="room.id" :value="room.id">
+              <option v-for="room in availableRoomsForSchedule" :key="room.id" :value="room.id">
                 {{ t('front-desk.common.room-abbr') }} {{ room.number }} · {{ room.type }} · {{ reservationsStore.getRoomStatusLabel(room.status) }} · {{ t('front-desk.reservation-form.capacity', { capacity: room.capacity }) }}
               </option>
             </select>
@@ -140,9 +158,9 @@ function resolveFeedbackMessage(message) {
             <input id="guestsQuantity" v-model.number="form.guestsQuantity" min="1" :max="selectedRoomCapacity || undefined" type="number" :aria-invalid="Boolean(errors.guestsQuantity)" :placeholder="t('front-desk.reservation-form.placeholders.guests-quantity')" />
             <p class="validation-message">{{ errors.guestsQuantity }}</p>
           </div>
-          <div class="form-field"><label for="startDate">{{ t('front-desk.reservation-form.start-date') }}</label><input id="startDate" v-model="form.startDate" type="date" :aria-invalid="Boolean(errors.startAt)" /><p class="validation-message">{{ errors.startAt }}</p></div>
+          <div class="form-field"><label for="startDate">{{ t('front-desk.reservation-form.start-date') }}</label><input id="startDate" v-model="form.startDate" type="date" :min="todayDate" :aria-invalid="Boolean(errors.startAt)" /><p class="validation-message">{{ errors.startAt }}</p></div>
           <div class="form-field"><label for="startTime">{{ t('front-desk.reservation-form.start-time') }}</label><input id="startTime" v-model="form.startTime" type="time" /></div>
-          <div class="form-field"><label for="endDate">{{ t('front-desk.reservation-form.end-date') }}</label><input id="endDate" v-model="form.endDate" type="date" :aria-invalid="Boolean(errors.endAt)" /><p class="validation-message">{{ errors.endAt }}</p></div>
+          <div class="form-field"><label for="endDate">{{ t('front-desk.reservation-form.end-date') }}</label><input id="endDate" v-model="form.endDate" type="date" :min="form.startDate || todayDate" :aria-invalid="Boolean(errors.endAt)" /><p class="validation-message">{{ errors.endAt }}</p></div>
           <div class="form-field"><label for="endTime">{{ t('front-desk.reservation-form.end-time') }}</label><input id="endTime" v-model="form.endTime" type="time" /></div>
         </div>
 

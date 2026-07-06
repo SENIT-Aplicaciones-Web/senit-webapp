@@ -496,7 +496,8 @@
       "valid-phone": "Enter a valid 9-digit phone number.",
       "valid-email": "Enter a valid email address.",
       "valid-guests-quantity": "Enter a guests quantity greater than 0.",
-      "guests-exceed-capacity": "The number of guests exceeds the room capacity: {capacity}."
+      "guests-exceed-capacity": "The number of guests exceeds the room capacity: {capacity}.",
+      "start-in-past": "The start date cannot be earlier than the current time."
     }
   },
   "admin": {

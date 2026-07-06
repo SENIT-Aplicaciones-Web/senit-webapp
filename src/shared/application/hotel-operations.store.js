@@ -42,6 +42,15 @@ function hasWholeHourDuration(startAt, endAt) {
   return Number.isInteger(hours) && hours > 0
 }
 
+function hasDateRangeOverlap(firstStartAt, firstEndAt, secondStartAt, secondEndAt) {
+  const firstStart = new Date(firstStartAt).getTime()
+  const firstEnd = new Date(firstEndAt).getTime()
+  const secondStart = new Date(secondStartAt).getTime()
+  const secondEnd = new Date(secondEndAt).getTime()
+  if ([firstStart, firstEnd, secondStart, secondEnd].some(Number.isNaN)) return false
+  return firstStart < secondEnd && firstEnd > secondStart
+}
+
 function getStayRuntimeStatus(stay, now = new Date()) {
   if (!stay) return 'unknown'
   if (stay.status === 'finished' || stay.checkedOutAt) return 'finished'
@@ -450,6 +459,39 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     }
   }
 
+  function hasReservationOverlapForRoom(roomId, startAt, endAt, reservationId = null) {
+    return reservations.value.some(reservation => {
+      if (reservation.status !== 'confirmed') return false
+      if (sameId(reservation.id, reservationId)) return false
+      if (!sameId(reservation.roomId, roomId)) return false
+      return hasDateRangeOverlap(startAt, endAt, reservation.startAt, reservation.endAt)
+    })
+  }
+
+  function hasStayOverlapForRoom(roomId, startAt, endAt, stayId = null) {
+    return activeStaysWithDetails.value.some(stay => {
+      if (sameId(stay.id, stayId)) return false
+      if (!sameId(stay.roomId, roomId)) return false
+      return hasDateRangeOverlap(startAt, endAt, stay.checkInAt, stay.checkOutLimitAt)
+    })
+  }
+
+  function hasValidFutureSchedule(startAt, endAt) {
+    const start = new Date(startAt).getTime()
+    const end = new Date(endAt).getTime()
+    return Boolean(startAt && endAt) && !Number.isNaN(start) && !Number.isNaN(end) && start >= now.value.getTime() && end > start
+  }
+
+  function getReservationAvailableRooms({ startAt, endAt, reservationId = null } = {}) {
+    const roomsAllowedForFutureReservations = hotelRooms.value.filter(room => !['maintenance', 'blocked'].includes(room.status))
+    if (!hasValidFutureSchedule(startAt, endAt)) return roomsAllowedForFutureReservations
+
+    return roomsAllowedForFutureReservations.filter(room =>
+      !hasReservationOverlapForRoom(room.id, startAt, endAt, reservationId) &&
+      !hasStayOverlapForRoom(room.id, startAt, endAt)
+    )
+  }
+
   function validateReservationAvailability({ roomId, startAt, endAt, reservationId = null }) {
     const start = new Date(startAt).getTime()
     const end = new Date(endAt).getTime()
@@ -460,27 +502,45 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     if (!startAt || !endAt || Number.isNaN(start) || Number.isNaN(end) || end <= start) {
       return { valid: false, message: 'front-desk.validation.end-after-start' }
     }
+    if (start < now.value.getTime()) {
+      return { valid: false, message: 'front-desk.validation.start-in-past' }
+    }
     if (!hasWholeHourDuration(startAt, endAt)) {
       return { valid: false, message: 'front-desk.validation.duration-whole-hours' }
     }
 
-    const hasReservationOverlap = reservations.value.some(reservation => {
-      if (reservation.status !== 'confirmed') return false
-      if (sameId(reservation.id, reservationId)) return false
-      if (!sameId(reservation.roomId, roomId)) return false
-      return start < new Date(reservation.endAt).getTime() && end > new Date(reservation.startAt).getTime()
-    })
-
-    const hasStayOverlap = activeStaysWithDetails.value.some(stay => {
-      if (!sameId(stay.roomId, roomId)) return false
-      return start < new Date(stay.checkOutLimitAt).getTime() && end > new Date(stay.checkInAt).getTime()
-    })
-
-    if (hasReservationOverlap || hasStayOverlap) {
+    if (hasReservationOverlapForRoom(roomId, startAt, endAt, reservationId) || hasStayOverlapForRoom(roomId, startAt, endAt)) {
       return { valid: false, message: 'front-desk.validation.overlapping-booking' }
     }
 
     return { valid: true, message: '' }
+  }
+
+  function validateCheckInAvailability({ roomId, hours }) {
+    const room = getRoomById(roomId)
+    const stayHours = Number(hours)
+    if (!room) return { valid: false, message: 'front-desk.validation.valid-room' }
+    if (room.status !== 'available') return { valid: false, message: 'front-desk.validation.room-not-available' }
+    if (!Number.isInteger(stayHours) || stayHours < 1 || stayHours > 168) {
+      return { valid: false, message: 'front-desk.check-in.validation.hours' }
+    }
+
+    const checkInAt = now.value
+    const checkOutLimitAt = addHours(checkInAt, stayHours)
+    if (hasReservationOverlapForRoom(roomId, checkInAt.toISOString(), checkOutLimitAt.toISOString())) {
+      return { valid: false, message: 'front-desk.validation.overlapping-booking' }
+    }
+    if (hasStayOverlapForRoom(roomId, checkInAt.toISOString(), checkOutLimitAt.toISOString())) {
+      return { valid: false, message: 'front-desk.validation.room-not-available' }
+    }
+
+    return { valid: true, message: '' }
+  }
+
+  function getAvailableRoomsForCheckIn(hours) {
+    const stayHours = Number(hours)
+    if (!Number.isInteger(stayHours) || stayHours < 1 || stayHours > 168) return []
+    return availableRooms.value.filter(room => validateCheckInAvailability({ roomId: room.id, hours: stayHours }).valid)
   }
 
   async function sendNotification({ title, message, type = 'info' }) {
@@ -579,10 +639,10 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
   }
 
   async function createCheckIn(checkInData) {
-    const room = getRoomById(checkInData.roomId)
-    if (!room) return { ok: false, message: 'front-desk.validation.valid-room' }
-    if (room.status !== 'available') return { ok: false, message: 'front-desk.validation.room-not-available' }
+    const validation = validateCheckInAvailability(checkInData)
+    if (!validation.valid) return { ok: false, message: validation.message }
 
+    const room = getRoomById(checkInData.roomId)
     const checkInAt = new Date()
     const hours = Number(checkInData.hours)
     const checkOutLimitAt = addHours(checkInAt, hours)
@@ -1007,6 +1067,9 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     getStayConsumptions,
     searchEverywhere,
     validateReservationAvailability,
+    getReservationAvailableRooms,
+    validateCheckInAvailability,
+    getAvailableRoomsForCheckIn,
     createReservation,
     cancelReservation,
     createCheckIn,

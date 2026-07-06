@@ -16,6 +16,15 @@ const useReservationsStore = defineStore('reservations', () => {
   const hasProPlan = computed(() => dataContext.hasProPlan)
 
   /**
+   * @summary Gets rooms available for a reservation period.
+   * @param {object} reservationSchedule Reservation schedule.
+   * @returns {object[]} Rooms that do not overlap with reservations or active stays.
+   */
+  function getReservationAvailableRooms(reservationSchedule) {
+    return dataContext.getReservationAvailableRooms(reservationSchedule)
+  }
+
+  /**
    * @summary Checks if a room is available for a reservation period.
    * @param {object} reservationSchedule Reservation availability data.
    * @returns {{valid: boolean, message: string}}
@@ -64,6 +73,7 @@ const useReservationsStore = defineStore('reservations', () => {
     activeReservations,
     rooms,
     hasProPlan,
+    getReservationAvailableRooms,
     validateReservationAvailability,
     createReservation,
     cancelReservation,

@@ -19,6 +19,24 @@ const useGuestStaysStore = defineStore('guest-stays', () => {
   const hasProPlan = computed(() => dataContext.hasProPlan)
 
   /**
+   * @summary Gets rooms available for a check-in duration without colliding with future reservations.
+   * @param {number} hours Stay duration in hours.
+   * @returns {object[]} Rooms available for immediate check-in.
+   */
+  function getAvailableRoomsForCheckIn(hours) {
+    return dataContext.getAvailableRoomsForCheckIn(hours)
+  }
+
+  /**
+   * @summary Checks if a room can be used for an immediate check-in.
+   * @param {object} checkInSchedule Check-in room and duration data.
+   * @returns {{valid: boolean, message: string}} Validation result.
+   */
+  function validateCheckInAvailability(checkInSchedule) {
+    return dataContext.validateCheckInAvailability(checkInSchedule)
+  }
+
+  /**
    * @summary Gets a room by id for the check-in form.
    * @param {number|string} roomId Room id.
    * @returns {object|null}
@@ -71,6 +89,8 @@ const useGuestStaysStore = defineStore('guest-stays', () => {
     availableRooms,
     dashboardStats,
     hasProPlan,
+    getAvailableRoomsForCheckIn,
+    validateCheckInAvailability,
     getRoomById,
     getStayById,
     createCheckIn,

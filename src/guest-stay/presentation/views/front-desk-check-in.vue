@@ -22,6 +22,7 @@ const errors = reactive({})
 const feedback = ref({ type: '', message: '' })
 const createdStay = ref(null)
 
+const checkInAvailableRooms = computed(() => guestStaysStore.getAvailableRoomsForCheckIn(form.hours))
 const selectedRoom = computed(() => guestStaysStore.getRoomById(form.roomId))
 const checkoutLimit = computed(() => formatDateTime(addHours(new Date(), form.hours)))
 const initialAmount = computed(() => selectedRoom.value ? Number(form.hours) * Number(selectedRoom.value.pricePerHour) : 0)
@@ -57,9 +58,16 @@ function validate() {
     setError('roomId', t('front-desk.check-in.validation.room'))
     valid = false
   }
-  if (!form.hours || Number(form.hours) <= 0) {
+  if (!Number.isInteger(Number(form.hours)) || Number(form.hours) <= 0 || Number(form.hours) > 168) {
     setError('hours', t('front-desk.check-in.validation.hours'))
     valid = false
+  }
+  if (valid) {
+    const availability = guestStaysStore.validateCheckInAvailability({ roomId: form.roomId, hours: form.hours })
+    if (!availability.valid) {
+      setError('roomId', t(availability.message))
+      valid = false
+    }
   }
   return valid
 }
@@ -141,7 +149,7 @@ function resolveFeedbackMessage(message) {
             <label>{{ t('front-desk.check-in.room') }}</label>
             <select v-model="form.roomId">
               <option value="">{{ t('front-desk.check-in.select-room') }}</option>
-              <option v-for="room in guestStaysStore.availableRooms" :key="room.id" :value="room.id">
+              <option v-for="room in checkInAvailableRooms" :key="room.id" :value="room.id">
                 {{ t('front-desk.common.room-abbr') }} {{ room.number }} · {{ room.type }} · S/ {{ room.pricePerHour.toFixed(2) }}/h
               </option>
             </select>

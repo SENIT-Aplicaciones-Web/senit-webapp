@@ -496,7 +496,8 @@
       "valid-phone": "Ingrese un teléfono válido de 9 dígitos.",
       "valid-email": "Ingrese un correo electrónico válido.",
       "valid-guests-quantity": "Ingrese una cantidad de huéspedes mayor a 0.",
-      "guests-exceed-capacity": "La cantidad de huéspedes supera la capacidad de la habitación: {capacity}."
+      "guests-exceed-capacity": "La cantidad de huéspedes supera la capacidad de la habitación: {capacity}.",
+      "start-in-past": "La fecha de inicio no puede ser anterior al momento actual."
     }
   },
   "admin": {
