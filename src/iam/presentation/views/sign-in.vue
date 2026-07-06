@@ -93,6 +93,7 @@ function goToSignUp() {
 
         <h2>{{ t('credentials.demo') }}</h2>
         <h2>admin@admin.com / 123456</h2>
+        <h2>recepcion@recepcion.com / 123456</h2>
       </div>
     </section>
 
