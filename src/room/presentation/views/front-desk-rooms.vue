@@ -203,7 +203,7 @@ function resolveFeedbackMessage(message) {
 
 .room-tile {
   width: 136px;
-  height: 172px;
+  min-height: 234px;
   display: flex;
   flex-direction: column;
   gap: 0.28rem;
