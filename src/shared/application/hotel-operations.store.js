@@ -601,12 +601,8 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     const stayHours = Number(hours)
     const totalGuests = Number(guestsQuantity)
     if (!Number.isInteger(stayHours) || stayHours < 1 || stayHours > 168) return []
-<<<<<<< Updated upstream
-    return hotelRooms.value.filter(room => room.status === 'available')
-=======
     if (!Number.isInteger(totalGuests) || totalGuests < 1 || totalGuests > 99) return []
     return hotelRooms.value.filter(room => room.status === 'available' && Number(room.capacity ?? 0) >= totalGuests)
->>>>>>> Stashed changes
   }
 
   async function sendNotification({ title, message, type = 'info' }) {
