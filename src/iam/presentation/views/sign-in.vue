@@ -376,7 +376,13 @@ label {
 }
 
 .secondary-auth-button.p-button {
-  background: #64748b;
+  background: rgb(238, 244, 255);
+  color: #1e3a8a;
+}
+
+.secondary-auth-button.p-button:hover {
+  background: #dbeafe;
+  color: #1e3a8a;
 }
 
 .error-message {

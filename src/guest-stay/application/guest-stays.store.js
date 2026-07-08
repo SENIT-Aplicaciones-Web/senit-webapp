@@ -15,6 +15,7 @@ const useGuestStaysStore = defineStore('guest-stays', () => {
   const endingSoonStays = computed(() => dataContext.endingSoonStays)
   const overdueStays = computed(() => dataContext.overdueStays)
   const availableRooms = computed(() => dataContext.availableRooms)
+  const activeReservationStays = computed(() => dataContext.reservationsWithDetails.filter(reservation => reservation.runtimeStatus === 'active'))
   const dashboardStats = computed(() => dataContext.dashboardStats)
   const hasProPlan = computed(() => dataContext.hasProPlan)
 
@@ -23,8 +24,8 @@ const useGuestStaysStore = defineStore('guest-stays', () => {
    * @param {number} hours Stay duration in hours.
    * @returns {object[]} Rooms available for immediate check-in.
    */
-  function getAvailableRoomsForCheckIn(hours) {
-    return dataContext.getAvailableRoomsForCheckIn(hours)
+  function getAvailableRoomsForCheckIn(hours, guestsQuantity = 1) {
+    return dataContext.getAvailableRoomsForCheckIn(hours, guestsQuantity)
   }
 
   /**
@@ -34,6 +35,15 @@ const useGuestStaysStore = defineStore('guest-stays', () => {
    */
   function validateCheckInAvailability(checkInSchedule) {
     return dataContext.validateCheckInAvailability(checkInSchedule)
+  }
+
+  /**
+   * @summary Checks whether a guest identified by DNI already has an active stay.
+   * @param {string} dni Guest DNI.
+   * @returns {boolean}
+   */
+  function hasActiveStayByGuestDni(dni) {
+    return dataContext.hasActiveStayByGuestDni(dni)
   }
 
   /**
@@ -64,6 +74,15 @@ const useGuestStaysStore = defineStore('guest-stays', () => {
   }
 
   /**
+   * @summary Starts an active reservation as a guest stay.
+   * @param {number|string} reservationId Reservation id.
+   * @returns {{ok: boolean, message: string, stay?: object}}
+   */
+  function startReservationStay(reservationId) {
+    return dataContext.startReservationStay(reservationId)
+  }
+
+  /**
    * @summary Adds a consumption to an active stay.
    * @param {number|string} stayId Stay id.
    * @param {object} consumptionData Consumption form data.
@@ -87,13 +106,16 @@ const useGuestStaysStore = defineStore('guest-stays', () => {
     endingSoonStays,
     overdueStays,
     availableRooms,
+    activeReservationStays,
     dashboardStats,
     hasProPlan,
     getAvailableRoomsForCheckIn,
     validateCheckInAvailability,
+    hasActiveStayByGuestDni,
     getRoomById,
     getStayById,
     createCheckIn,
+    startReservationStay,
     addConsumption,
     fetchGuestStays
   }

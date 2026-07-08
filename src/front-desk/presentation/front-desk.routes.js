@@ -9,6 +9,7 @@ const frontDeskSettings = () => import('./views/front-desk-settings.vue')
 const stayDetails = () => import('../../guest-stay/presentation/views/stay-details.vue')
 const stayCheckout = () => import('../../payment/presentation/views/stay-checkout.vue')
 const frontDeskReservationForm = () => import('../../reservation/presentation/views/front-desk-reservation-form.vue')
+const reservationDetails = () => import('../../reservation/presentation/views/reservation-details.vue')
 
 const frontDeskRoutes = [
     {
@@ -21,6 +22,7 @@ const frontDeskRoutes = [
             { path: 'check-in', name: 'front-desk-check-in', component: frontDeskCheckIn, meta: { title: 'Check-in' } },
             { path: 'reservations', name: 'front-desk-reservations', component: frontDeskReservations, meta: { title: 'Reservas' } },
             { path: 'reservations/new', name: 'front-desk-reservation-new', component: frontDeskReservationForm, meta: { title: 'Nueva Reserva' } },
+            { path: 'reservations/:id', name: 'front-desk-reservation-details', component: reservationDetails, meta: { title: 'Detalles de Reserva' } },
             { path: 'alerts', name: 'front-desk-alerts', component: frontDeskAlerts, meta: { title: 'Alertas' } },
             { path: 'settings', name: 'front-desk-settings', component: frontDeskSettings, meta: { title: 'Configuración' } },
             { path: 'stays/:id/details', name: 'front-desk-stay-details', component: stayDetails, meta: { title: 'Detalles de Estadía' } },

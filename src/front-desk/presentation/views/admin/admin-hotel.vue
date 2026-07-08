@@ -11,6 +11,18 @@ const feedback = ref({ type: '', message: '' })
 const isSavingHotel = ref(false)
 const form = reactive({ name: '', ruc: '', address: '', phone: '', email: '', plan: '' })
 
+function keepDigits(value, maxLength) {
+  return String(value ?? '').replace(/\D/g, '').slice(0, maxLength)
+}
+
+function updateRuc(value) {
+  form.ruc = keepDigits(value, 11)
+}
+
+function updatePhone(value) {
+  form.phone = keepDigits(value, 20)
+}
+
 watchEffect(() => {
   if (!operationsStore.activeHotel) return
   Object.assign(form, operationsStore.activeHotel)
@@ -38,11 +50,11 @@ function resolveFeedbackMessage(message) {
     <section class="form-card">
       <div class="panel-header"><h2>{{ t('admin.hotel.establishment-data') }}</h2></div>
       <form class="form-grid" :aria-busy="isSavingHotel" @submit.prevent="saveHotel">
-        <div class="form-field"><label>{{ t('admin.hotel.commercial-name') }}</label><pv-input-text v-model="form.name" /></div>
-        <div class="form-field"><label>{{ t('admin.hotel.ruc') }}</label><pv-input-text v-model="form.ruc" /></div>
-        <div class="form-field full"><label>{{ t('admin.hotel.address') }}</label><pv-input-text v-model="form.address" /></div>
-        <div class="form-field"><label>{{ t('admin.hotel.phone') }}</label><pv-input-text v-model="form.phone" /></div>
-        <div class="form-field"><label>{{ t('admin.hotel.email') }}</label><pv-input-text v-model="form.email" /></div>
+        <div class="form-field"><label>{{ t('admin.hotel.commercial-name') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.name" :placeholder="t('admin.hotel.placeholders.name')" /></div>
+        <div class="form-field"><label>{{ t('admin.hotel.ruc') }} <span class="required-mark">*</span></label><pv-input-text :model-value="form.ruc" :placeholder="t('admin.hotel.placeholders.ruc')" inputmode="numeric" maxlength="11" @update:model-value="updateRuc" /></div>
+        <div class="form-field full"><label>{{ t('admin.hotel.address') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.address" :placeholder="t('admin.hotel.placeholders.address')" /></div>
+        <div class="form-field"><label>{{ t('admin.hotel.phone') }} <span class="required-mark">*</span></label><pv-input-text :model-value="form.phone" :placeholder="t('admin.hotel.placeholders.phone')" inputmode="numeric" maxlength="20" @update:model-value="updatePhone" /></div>
+        <div class="form-field"><label>{{ t('admin.hotel.email') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.email" :placeholder="t('admin.hotel.placeholders.email')" /></div>
         <div class="form-field"><label>{{ t('admin.hotel.plan') }}</label><input :value="form.plan" disabled /></div>
         <div class="form-field plan-button-field">
           <button class="secondary-button" type="button" @click="router.push({ name: 'admin-subscription' })"><i class="pi pi-credit-card"></i>{{ t('admin.hotel.manage-subscription') }}</button>

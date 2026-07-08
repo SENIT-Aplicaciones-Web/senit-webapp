@@ -9,6 +9,7 @@ const api = new BaseApi()
 const usersEndpoint = new BaseEndpoint(api, import.meta.env.VITE_USERS_ENDPOINT_PATH ?? '/users')
 const authenticationPath = import.meta.env.VITE_AUTHENTICATION_ENDPOINT_PATH ?? '/authentication'
 const hotelsPath = import.meta.env.VITE_HOTELS_ENDPOINT_PATH ?? '/hotels'
+const subscriptionPaymentsPath = import.meta.env.VITE_SUBSCRIPTION_PAYMENTS_ENDPOINT_PATH ?? '/subscription-payments'
 
 function normalizeEmail(email) {
   return String(email ?? '').trim().toLowerCase()
@@ -82,6 +83,22 @@ export class AuthenticationApi {
       if (hasApiStatus(error, [409])) return null
       throw error
     }
+  }
+
+
+  static async createStripeSubscriptionCheckoutSession(command) {
+    const response = await api.http.post(`${subscriptionPaymentsPath}/stripe-checkout/sessions`, {
+      username: String(command.username ?? '').trim(),
+      email: normalizeEmail(command.email),
+      password: command.password,
+      plan: command.plan ?? 'Basic'
+    })
+    return response.data
+  }
+
+  static async getStripeSubscriptionCheckoutSession(sessionId) {
+    const response = await api.http.get(`${subscriptionPaymentsPath}/stripe-checkout/sessions/${encodeURIComponent(sessionId)}`)
+    return response.data
   }
 
   static async createUser(userData) {

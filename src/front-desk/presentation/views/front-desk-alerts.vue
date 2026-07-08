@@ -21,7 +21,9 @@ const alertStays = computed(() => {
 })
 
 function remainingText(stay) {
-  return formatCompactRemainingTime(getRemainingMilliseconds(stay.checkOutLimitAt, frontDeskStore.now))
+  const remainingMilliseconds = getRemainingMilliseconds(stay.checkOutLimitAt, frontDeskStore.now)
+  if (remainingMilliseconds <= 0) return t('front-desk.alerts.time-expired')
+  return formatCompactRemainingTime(remainingMilliseconds)
 }
 
 function checkoutStay(stay) {
@@ -82,7 +84,7 @@ function checkoutStay(stay) {
             <tr v-for="stay in alertStays" :key="stay.id">
               <td><span class="room-badge">{{ stay.room?.number }}</span></td>
               <td>{{ stay.guest.fullName }}</td>
-              <td>{{ t('front-desk.rooms.floor-with-number', { floor: stay.room?.floor }) }} · {{ stay.room?.type }}</td>
+              <td>{{ t('front-desk.rooms.floor-with-number', { floor: stay.room?.floor }) }}</td>
               <td>{{ formatDate(stay.checkOutLimitAt) }}</td>
               <td>{{ formatTime(stay.checkOutLimitAt) }}</td>
               <td class="remaining-cell">{{ remainingText(stay) }}</td>

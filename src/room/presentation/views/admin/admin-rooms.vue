@@ -148,12 +148,12 @@ function resolveFeedbackMessage(message) {
     <article class="form-card admin-room-form-card">
       <div class="panel-header"><h2>{{ t('admin.rooms.new-room') }}</h2></div>
       <form class="form-grid admin-room-form" :aria-busy="isSavingRoom" @submit.prevent="saveRoom">
-        <div class="form-field"><label>{{ t('admin.rooms.number') }}</label><pv-input-text v-model="form.number" :placeholder="t('admin.rooms.number-placeholder')" /></div>
-        <div class="form-field"><label>{{ t('admin.rooms.floor') }}</label><pv-input-number v-model="form.floor" :min="1" :use-grouping="false" input-id="room-floor" /></div>
-        <div class="form-field"><label>{{ t('admin.rooms.type') }}</label><pv-select v-model="form.type" :options="roomTypeOptions" option-label="label" option-value="value" /></div>
-        <div class="form-field"><label>{{ t('admin.rooms.capacity') }}</label><pv-input-number v-model="form.capacity" :min="1" :use-grouping="false" input-id="room-capacity" /></div>
-        <div class="form-field"><label>{{ t('admin.rooms.price-per-hour-currency') }}</label><pv-input-number v-model="form.pricePerHour" prefix="S/ " :min="1" :min-fraction-digits="2" :max-fraction-digits="2" input-id="room-price" /></div>
-        <div class="form-field"><label>{{ t('admin.rooms.initial-status') }}</label><pv-select v-model="form.status" :options="statusOptions" option-label="label" option-value="value" /></div>
+        <div class="form-field"><label>{{ t('admin.rooms.number') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.number" :placeholder="t('admin.rooms.number-placeholder')" /></div>
+        <div class="form-field"><label>{{ t('admin.rooms.floor') }} <span class="required-mark">*</span></label><pv-input-number v-model="form.floor" :min="1" :use-grouping="false" input-id="room-floor" /></div>
+        <div class="form-field"><label>{{ t('admin.rooms.type') }} <span class="required-mark">*</span></label><pv-select v-model="form.type" :options="roomTypeOptions" option-label="label" option-value="value" /></div>
+        <div class="form-field"><label>{{ t('admin.rooms.capacity') }} <span class="required-mark">*</span></label><pv-input-number v-model="form.capacity" :min="1" :use-grouping="false" input-id="room-capacity" /></div>
+        <div class="form-field"><label>{{ t('admin.rooms.price-per-hour-currency') }} <span class="required-mark">*</span></label><pv-input-number v-model="form.pricePerHour" prefix="S/ " :min="1" :min-fraction-digits="2" :max-fraction-digits="2" input-id="room-price" /></div>
+        <div class="form-field"><label>{{ t('admin.rooms.initial-status') }} <span class="required-mark">*</span></label><pv-select v-model="form.status" :options="statusOptions" option-label="label" option-value="value" /></div>
         <div class="form-field submit-field"><button class="primary-button" type="submit" :disabled="isSavingRoom"><i class="pi pi-plus"></i>{{ t('admin.rooms.register-room') }}</button></div>
       </form>
       <p v-if="creationFeedback.message" class="feedback slim-feedback" :class="creationFeedback.type">{{ resolveFeedbackMessage(creationFeedback.message) }}</p>
@@ -192,7 +192,7 @@ function resolveFeedbackMessage(message) {
         <article v-for="room in filteredRooms" :key="room.id" class="admin-room-row">
           <div>
             <strong>{{ t('admin.rooms.room-abbr') }} {{ room.number }}</strong>
-            <small>{{ t('admin.rooms.floor') }} {{ room.floor }} · {{ room.type }} · S/ {{ Number(room.pricePerHour).toFixed(2) }}/h</small>
+            <small>{{ t('admin.rooms.floor') }} {{ room.floor }} · {{ room.type }} · {{ t('admin.rooms.guests-capacity', { count: room.capacity }) }} · S/ {{ Number(room.pricePerHour).toFixed(2) }}/h</small>
           </div>
           <div class="status-control-block">
             <template v-if="room.stayId">
@@ -220,11 +220,11 @@ function resolveFeedbackMessage(message) {
 
           <div v-if="editingRoomId === room.id" class="inline-edit-panel">
             <div class="inline-edit-grid">
-              <div class="form-field"><label>{{ t('admin.rooms.number') }}</label><pv-input-text v-model="editForm.number" /></div>
-              <div class="form-field"><label>{{ t('admin.rooms.floor') }}</label><pv-input-number v-model="editForm.floor" :min="1" :use-grouping="false" /></div>
-              <div class="form-field"><label>{{ t('admin.rooms.type') }}</label><pv-select v-model="editForm.type" :options="roomTypeOptions" option-label="label" option-value="value" /></div>
-              <div class="form-field"><label>{{ t('admin.rooms.capacity') }}</label><pv-input-number v-model="editForm.capacity" :min="1" :use-grouping="false" /></div>
-              <div class="form-field"><label>{{ t('admin.rooms.price-per-hour-currency') }}</label><pv-input-number v-model="editForm.pricePerHour" prefix="S/ " :min="1" :min-fraction-digits="2" :max-fraction-digits="2" /></div>
+              <div class="form-field"><label>{{ t('admin.rooms.number') }} <span class="required-mark">*</span></label><pv-input-text v-model="editForm.number" /></div>
+              <div class="form-field"><label>{{ t('admin.rooms.floor') }} <span class="required-mark">*</span></label><pv-input-number v-model="editForm.floor" :min="1" :use-grouping="false" /></div>
+              <div class="form-field"><label>{{ t('admin.rooms.type') }} <span class="required-mark">*</span></label><pv-select v-model="editForm.type" :options="roomTypeOptions" option-label="label" option-value="value" /></div>
+              <div class="form-field"><label>{{ t('admin.rooms.capacity') }} <span class="required-mark">*</span></label><pv-input-number v-model="editForm.capacity" :min="1" :use-grouping="false" /></div>
+              <div class="form-field"><label>{{ t('admin.rooms.price-per-hour-currency') }} <span class="required-mark">*</span></label><pv-input-number v-model="editForm.pricePerHour" prefix="S/ " :min="1" :min-fraction-digits="2" :max-fraction-digits="2" /></div>
               <div class="form-field submit-field">
                 <div class="actions-row">
                   <button class="success-button" type="button" :disabled="savingEditRoomId === room.id" @click="saveEdit(room)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>

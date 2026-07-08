@@ -2488,3 +2488,37 @@ body,
     width: 100%;
   }
 }
+
+.required-mark,
+.required-symbol {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+button,
+.p-button {
+  position: relative;
+  overflow: hidden;
+}
+
+button::after,
+.p-button::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 0;
+  height: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+button:active::after,
+.p-button:active::after {
+  width: 180%;
+  height: 180%;
+  opacity: 1;
+  transition: width 0.28s ease, height 0.28s ease, opacity 0.36s ease;
+}

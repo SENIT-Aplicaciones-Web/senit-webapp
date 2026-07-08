@@ -11,6 +11,7 @@ const subscription = () => import('../../subscription-payment/presentation/views
 const stayDetails = () => import('../../guest-stay/presentation/views/stay-details.vue')
 const stayCheckout = () => import('../../payment/presentation/views/stay-checkout.vue')
 const reservationForm = () => import('../../reservation/presentation/views/front-desk-reservation-form.vue')
+const reservationDetails = () => import('../../reservation/presentation/views/reservation-details.vue')
 
 const adminRoutes = [
     {
@@ -22,6 +23,7 @@ const adminRoutes = [
             { path: 'rooms', name: 'admin-rooms', component: adminRooms, meta: { title: 'Habitaciones' } },
             { path: 'reservations', name: 'admin-reservations', component: reservations, meta: { title: 'Reservas' } },
             { path: 'reservations/new', name: 'admin-reservation-new', component: reservationForm, meta: { title: 'Nueva Reserva' } },
+            { path: 'reservations/:id', name: 'admin-reservation-details', component: reservationDetails, meta: { title: 'Detalles de Reserva' } },
             { path: 'stays', name: 'admin-stays', component: stays, meta: { title: 'Estadías' } },
             { path: 'stays/:id/details', name: 'admin-stay-details', component: stayDetails, meta: { title: 'Detalles de Estadía' } },
             { path: 'stays/:id/checkout', name: 'admin-stay-checkout', component: stayCheckout, meta: { title: 'Check-out' } },

@@ -14,9 +14,10 @@ const routes = [
     },
     ...iamRoutes,
     {
-        path: '/front-desk',
+        path: '/receptionist',
+        alias: '/front-desk',
         name: 'front-desk',
-        redirect: '/front-desk/dashboard',
+        redirect: '/receptionist/dashboard',
         meta: { requiresAuth: true, roles: ['FRONT_DESK', 'ADMIN'] },
         children: frontDeskRoutes
     },

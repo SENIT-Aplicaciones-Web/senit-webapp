@@ -110,11 +110,11 @@ function resolveFeedbackMessage(message) {
     <article class="form-card admin-full-card">
       <div class="panel-header"><h2>{{ t('admin.staff.new-staff-user') }}</h2></div>
       <form class="form-grid admin-staff-form" :aria-busy="isSavingStaff" @submit.prevent="saveStaffUser">
-        <div class="form-field full"><label>{{ t('admin.staff.full-name') }}</label><pv-input-text v-model="form.fullName" required /></div>
-        <div class="form-field"><label>{{ t('admin.staff.username') }}</label><pv-input-text v-model="form.username" required /></div>
-        <div class="form-field"><label>{{ t('admin.staff.email') }}</label><pv-input-text v-model="form.email" required /></div>
-        <div class="form-field"><label>{{ t('admin.staff.role') }}</label><pv-select v-model="form.role" :options="roleOptions" option-label="label" option-value="value" /></div>
-        <div class="form-field"><label>{{ t('admin.staff.initial-password') }}</label><pv-input-text v-model="form.password" /></div>
+        <div class="form-field full"><label>{{ t('admin.staff.full-name') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.fullName" required /></div>
+        <div class="form-field"><label>{{ t('admin.staff.username') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.username" required /></div>
+        <div class="form-field"><label>{{ t('admin.staff.email') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.email" required /></div>
+        <div class="form-field"><label>{{ t('admin.staff.role') }} <span class="required-mark">*</span></label><pv-select v-model="form.role" :options="roleOptions" option-label="label" option-value="value" /></div>
+        <div class="form-field"><label>{{ t('admin.staff.initial-password') }} <span class="required-mark">*</span></label><pv-input-text v-model="form.password" /></div>
         <div class="form-field full"><button class="primary-button" type="submit" :disabled="isSavingStaff"><i class="pi pi-user-plus"></i>{{ t('admin.staff.register-user') }}</button></div>
       </form>
       <p v-if="feedback.message" class="feedback slim-feedback" :class="feedback.type">{{ resolveFeedbackMessage(feedback.message) }}</p>
@@ -122,7 +122,7 @@ function resolveFeedbackMessage(message) {
 
     <article class="panel-card admin-full-card">
       <div class="panel-header">
-        <div><h2>{{ t('admin.staff.registered-users') }}</h2><p class="help-message">{{ t('admin.staff.registered-subtitle') }}</p></div>
+        <div><h2>{{ t('admin.staff.users') }}</h2><p class="help-message">{{ t('admin.staff.registered-subtitle') }}</p></div>
         <span class="room-badge">{{ staff.length }}</span>
       </div>
       <div class="admin-staff-controls named-filters">
@@ -159,11 +159,11 @@ function resolveFeedbackMessage(message) {
           <p v-if="rowFeedback[user.id]?.message" class="inline-feedback" :class="rowFeedback[user.id].type">{{ resolveFeedbackMessage(rowFeedback[user.id].message) }}</p>
           <div v-if="editingUserId === user.id" class="inline-edit-panel">
             <div class="inline-edit-grid">
-              <div class="form-field"><label>{{ t('admin.staff.full-name') }}</label><pv-input-text v-model="editForm.fullName" /></div>
-              <div class="form-field"><label>{{ t('admin.staff.username') }}</label><pv-input-text v-model="editForm.username" /></div>
-              <div class="form-field"><label>{{ t('admin.staff.email') }}</label><pv-input-text v-model="editForm.email" /></div>
-              <div class="form-field"><label>{{ t('admin.staff.role') }}</label><pv-select v-model="editForm.role" :options="roleOptions" option-label="label" option-value="value" /></div>
-              <div class="form-field"><label>{{ t('admin.staff.optional-password') }}</label><pv-input-text v-model="editForm.password" /></div>
+              <div class="form-field"><label>{{ t('admin.staff.full-name') }} <span class="required-mark">*</span></label><pv-input-text v-model="editForm.fullName" /></div>
+              <div class="form-field"><label>{{ t('admin.staff.username') }} <span class="required-mark">*</span></label><pv-input-text v-model="editForm.username" /></div>
+              <div class="form-field"><label>{{ t('admin.staff.email') }} <span class="required-mark">*</span></label><pv-input-text v-model="editForm.email" /></div>
+              <div class="form-field"><label>{{ t('admin.staff.role') }} <span class="required-mark">*</span></label><pv-select v-model="editForm.role" :options="roleOptions" option-label="label" option-value="value" /></div>
+              <div class="form-field"><label>{{ t('admin.staff.new-password') }}</label><pv-input-text v-model="editForm.password" /></div>
               <div class="form-field submit-field">
                 <div class="actions-row">
                   <button class="success-button" type="button" :disabled="savingEditUserId === user.id" @click="saveEdit(user)"><i class="pi pi-check"></i>{{ t('shared.actions.save') }}</button>
