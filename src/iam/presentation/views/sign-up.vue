@@ -10,6 +10,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const iamStore = useIamStore()
+const logoUrl = `${import.meta.env.BASE_URL}senit-logo-full.png`
 
 const requestedPlan = route.query.plan === 'Pro' ? 'Pro' : 'Basic'
 
@@ -73,7 +74,7 @@ function goToSignIn() {
 
     <section class="brand-section">
       <div class="brand-content">
-        <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
+        <img class="brand-logo-full" :src="logoUrl" :alt="t('brand.name')" />
         <p class="brand-tagline">{{ t('brand.tagline') }}</p>
       </div>
     </section>
