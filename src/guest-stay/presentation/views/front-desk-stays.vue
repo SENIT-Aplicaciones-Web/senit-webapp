@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import useGuestStaysStore from '../../application/guest-stays.store.js'
 import { toI18nKey } from '../../../shared/application/locale-key.js'
 import { downloadTextPdf } from '../../../shared/infrastructure/pdf-receipt.service.js'
-import { formatDateTime } from '../../../shared/domain/services/date-format.service.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,33 +13,17 @@ const guestStaysStore = useGuestStaysStore()
 const searchTerm = ref('')
 const statusFilter = ref('all')
 const feedback = ref({ type: '', message: '' })
-const startingReservationId = ref(null)
-
-const reservationStays = computed(() => guestStaysStore.activeReservationStays.map(reservation => ({
-  id: `reservation-${reservation.id}`,
-  reservationId: reservation.id,
-  room: reservation.room,
-  guest: { fullName: reservation.guestName },
-  formattedCheckIn: formatDateTime(reservation.startAt),
-  formattedCheckOut: formatDateTime(reservation.endAt),
-  status: 'active',
-  paymentStatus: reservation.paymentStatus ?? 'paid',
-  total: Number(reservation.reservationAmount ?? reservation.prepaidAmount ?? 0),
-  isReservation: true
-})))
-
-const operationalRows = computed(() => [...reservationStays.value, ...guestStaysStore.staysWithDetails])
 
 const filteredStays = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
-  return operationalRows.value.filter(stay => {
+  return guestStaysStore.staysWithDetails.filter(stay => {
     const matchesSearch = !term || stay.guest.fullName.toLowerCase().includes(term) || stay.room?.number?.toLowerCase().includes(term)
     const matchesStatus = statusFilter.value === 'all' || stay.status === statusFilter.value
     return matchesSearch && matchesStatus
   })
 })
 
-const activeCount = computed(() => guestStaysStore.activeStaysWithDetails.length + reservationStays.value.length)
+const activeCount = computed(() => guestStaysStore.activeStaysWithDetails.length)
 const finishedToday = computed(() => guestStaysStore.dashboardStats.checkOutsToday)
 const endingSoonCount = computed(() => guestStaysStore.endingSoonStays.length)
 const overdueCount = computed(() => guestStaysStore.overdueStays.length)
@@ -66,15 +49,6 @@ function exportStaysReport() {
 function isAdminRoute() { return route.path.startsWith('/admin') }
 function goToReservationForm() { router.push({ name: isAdminRoute() ? 'admin-reservation-new' : 'front-desk-reservation-new' }) }
 function checkoutStay(stay) { router.push({ name: isAdminRoute() ? 'admin-stay-checkout' : 'front-desk-stay-checkout', params: { id: stay.id } }) }
-
-async function startReservationStay(stay) {
-  if (!stay.reservationId || startingReservationId.value) return
-  startingReservationId.value = stay.reservationId
-  const result = await guestStaysStore.startReservationStay(stay.reservationId)
-  feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
-  startingReservationId.value = null
-  if (result.ok && result.stay?.id) checkoutStay(result.stay)
-}
 
 function resolveFeedbackMessage(message) {
   return /^[a-z0-9.-]+$/.test(message ?? '') ? t(message) : message
@@ -147,8 +121,7 @@ function resolveFeedbackMessage(message) {
               <td><span class="status-badge adaptive-badge" :class="stay.paymentStatus === 'paid' ? 'paid' : 'pending'">{{ t('front-desk.payment-status.' + toI18nKey(stay.paymentStatus)) }}</span></td>
               <td class="numeric-cell">{{ stay.total.toFixed(2) }}</td>
               <td class="actions">
-                <button v-if="stay.isReservation" class="success-button table-action-button" :disabled="startingReservationId === stay.reservationId" type="button" @click="startReservationStay(stay)"><i class="pi pi-arrow-right"></i>{{ t('front-desk.reservations.start-stay') }}</button>
-                <button v-else class="success-button table-action-button" :disabled="stay.status === 'finished'" type="button" @click="checkoutStay(stay)"><i class="pi pi-arrow-right"></i>{{ t('front-desk.stays.checkout-action') }}</button>
+                <button class="success-button table-action-button" :disabled="stay.status === 'finished'" type="button" @click="checkoutStay(stay)"><i class="pi pi-arrow-right"></i>{{ t('front-desk.stays.checkout-action') }}</button>
               </td>
             </tr>
           </tbody>

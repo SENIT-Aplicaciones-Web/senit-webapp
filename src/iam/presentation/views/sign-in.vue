@@ -9,7 +9,6 @@ import LanguageSwitcher from '../../../shared/presentation/components/language-s
 const { t } = useI18n()
 const router = useRouter()
 const iamStore = useIamStore()
-const logoUrl = `${import.meta.env.BASE_URL}senit-logo-full.png`
 
 onMounted(() => iamStore.clearMessages())
 
@@ -103,8 +102,12 @@ function goToSignUp() {
 
     <section class="brand-section">
       <div class="brand-content">
-        <img class="brand-logo-full" :src="logoUrl" :alt="t('brand.name')" />
-        <p class="brand-tagline">{{ t('brand.tagline') }}</p>
+        <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
+        <p class="brand-tagline">{{ t('brand.tagline') }}</p><br>
+
+        <h2>{{ t('credentials.demo') }}</h2>
+        <h2>admin@admin.com / 123456</h2>
+        <h2>recepcion@recepcion.com / 12345</h2>
       </div>
     </section>
 
@@ -373,13 +376,7 @@ label {
 }
 
 .secondary-auth-button.p-button {
-  background: rgb(238, 244, 255);
-  color: #1e3a8a;
-}
-
-.secondary-auth-button.p-button:hover {
-  background: #dbeafe;
-  color: #1e3a8a;
+  background: #64748b;
 }
 
 .error-message {

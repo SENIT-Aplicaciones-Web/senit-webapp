@@ -57,31 +57,6 @@ const useIamStore = defineStore('iam', () => {
         }
     }
 
-
-    async function startStripeSubscriptionCheckout(command) {
-        errors.value = []
-        successMessage.value = ''
-
-        try {
-            return await AuthenticationApi.createStripeSubscriptionCheckoutSession(command)
-        } catch (error) {
-            errors.value.push(new Error(getApiErrorMessage(error, 'auth.checkout-error')))
-            return null
-        }
-    }
-
-    async function getStripeSubscriptionCheckoutSession(sessionId) {
-        errors.value = []
-        successMessage.value = ''
-
-        try {
-            return await AuthenticationApi.getStripeSubscriptionCheckoutSession(sessionId)
-        } catch (error) {
-            errors.value.push(new Error(getApiErrorMessage(error, 'auth.checkout-session-not-found')))
-            return null
-        }
-    }
-
     async function resetPassword(email, newPassword) {
         errors.value = []
         successMessage.value = ''
@@ -149,8 +124,6 @@ const useIamStore = defineStore('iam', () => {
         loadUsers,
         signIn,
         signUp,
-        startStripeSubscriptionCheckout,
-        getStripeSubscriptionCheckoutSession,
         refreshUsers,
         resetPassword,
         changePassword,

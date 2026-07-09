@@ -18,26 +18,6 @@ function sameId(firstValue, secondValue) {
   return String(firstValue ?? '') === String(secondValue ?? '')
 }
 
-function parseAdditionalGuests(value) {
-  if (Array.isArray(value)) return value
-  if (!value || typeof value !== 'string') return []
-  try {
-    const parsed = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
-function stringifyAdditionalGuests(value) {
-  const guests = Array.isArray(value) ? value : []
-  return JSON.stringify(guests.map(guest => ({
-    fullName: String(guest.fullName ?? '').trim(),
-    dni: String(guest.dni ?? '').trim()
-  })).filter(guest => guest.fullName && guest.dni))
-}
-
-
 function getErrorMessage(error, fallback) {
   return getApiErrorMessage(error, fallback)
 }
@@ -51,7 +31,7 @@ function getReservationRuntimeStatus(reservation, referenceDate = new Date()) {
   const currentTime = referenceDate.getTime()
 
   if (!Number.isNaN(endTime) && endTime < currentTime) return 'completed'
-  if (!Number.isNaN(startTime) && !Number.isNaN(endTime) && startTime <= currentTime && currentTime < endTime) return 'active'
+  if (!Number.isNaN(startTime) && !Number.isNaN(endTime) && startTime <= currentTime && currentTime < endTime) return 'readyForCheckIn'
 
   return reservation.status ?? 'confirmed'
 }
@@ -214,8 +194,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
         runtimeStatus,
         room: getRoomById(reservation.roomId),
         statusLabel: getReservationStatusLabel(runtimeStatus),
-        canStartStay: runtimeStatus === 'active',
-        canCancel: runtimeStatus === 'confirmed'
+        canStartStay: runtimeStatus === 'readyForCheckIn'
       }
     })
   )
@@ -323,8 +302,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
       ...reservation,
       hours: Number(reservation.hours ?? getReservationHours(reservation.startAt, reservation.endAt)),
       reservationAmount: money(reservation.reservationAmount ?? 0),
-      prepaidAmount: money(reservation.prepaidAmount ?? 0),
-      additionalGuests: parseAdditionalGuests(reservation.additionalGuests ?? reservation.additionalGuestsJson)
+      prepaidAmount: money(reservation.prepaidAmount ?? 0)
     }
   }
 
@@ -340,8 +318,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
       initialAmount: baseAmount,
       baseAmount,
       guest: stay.guest ?? { fullName: stay.guestName ?? '' },
-      paymentStatus: stay.paymentStatus ?? 'pending',
-      additionalGuests: parseAdditionalGuests(stay.additionalGuests ?? stay.additionalGuestsJson)
+      paymentStatus: stay.paymentStatus ?? 'pending'
     }
   }
 
@@ -409,13 +386,6 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
 
   function getPaymentForReservation(reservationId) {
     return payments.value.find(payment => sameId(payment.reservationId, reservationId) && isConfirmedPayment(payment)) ?? null
-  }
-
-
-  function hasActiveStayByGuestDni(dni) {
-    const normalizedDni = String(dni ?? '').trim()
-    if (!normalizedDni) return false
-    return activeStaysWithDetails.value.some(stay => String(stay.guest?.dni ?? '').trim() === normalizedDni)
   }
 
   function getInvoiceForStay(stayId) {
@@ -528,12 +498,9 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     return Boolean(startAt && endAt) && !Number.isNaN(start) && !Number.isNaN(end) && start >= now.value.getTime() && end > start
   }
 
-  function getReservationAvailableRooms({ startAt, endAt, reservationId = null, guestsQuantity = 1 } = {}) {
-    const totalGuests = Number(guestsQuantity)
-    const roomsAllowedForFutureReservations = hotelRooms.value.filter(room =>
-      !['maintenance', 'blocked'].includes(room.status) && Number(room.capacity) >= totalGuests
-    )
-    if (!hasValidFutureSchedule(startAt, endAt)) return []
+  function getReservationAvailableRooms({ startAt, endAt, reservationId = null } = {}) {
+    const roomsAllowedForFutureReservations = hotelRooms.value.filter(room => !['maintenance', 'blocked'].includes(room.status))
+    if (!hasValidFutureSchedule(startAt, endAt)) return roomsAllowedForFutureReservations
 
     return roomsAllowedForFutureReservations.filter(room =>
       !hasReservationOverlapForRoom(room.id, startAt, endAt, reservationId) &&
@@ -548,7 +515,6 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
 
     if (!room) return { valid: false, message: 'front-desk.validation.valid-room' }
     if (room.status === 'maintenance' || room.status === 'blocked') return { valid: false, message: 'front-desk.validation.room-not-available-reservation' }
-    if (Number(arguments[0]?.guestsQuantity ?? 1) > Number(room.capacity ?? 0)) return { valid: false, message: 'front-desk.validation.guests-exceed-capacity' }
     if (!startAt || !endAt || Number.isNaN(start) || Number.isNaN(end) || end <= start) {
       return { valid: false, message: 'front-desk.validation.end-after-start' }
     }
@@ -566,23 +532,13 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     return { valid: true, message: '' }
   }
 
-  function validateCheckInAvailability({ roomId, hours, guestsQuantity = 1, dni = '' }) {
+  function validateCheckInAvailability({ roomId, hours }) {
     const room = getRoomById(roomId)
     const stayHours = Number(hours)
-    const totalGuests = Number(guestsQuantity)
     if (!room) return { valid: false, message: 'front-desk.validation.valid-room' }
     if (room.status !== 'available') return { valid: false, message: 'front-desk.validation.room-not-available' }
     if (!Number.isInteger(stayHours) || stayHours < 1 || stayHours > 168) {
       return { valid: false, message: 'front-desk.check-in.validation.hours' }
-    }
-    if (!Number.isInteger(totalGuests) || totalGuests < 1 || totalGuests > 99) {
-      return { valid: false, message: 'front-desk.check-in.validation.guests-quantity' }
-    }
-    if (totalGuests > Number(room.capacity ?? 0)) {
-      return { valid: false, message: 'front-desk.validation.guests-exceed-capacity' }
-    }
-    if (hasActiveStayByGuestDni(dni)) {
-      return { valid: false, message: 'front-desk.check-in.validation.guest-active-stay' }
     }
 
     const checkInAt = now.value
@@ -597,12 +553,10 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     return { valid: true, message: '' }
   }
 
-  function getAvailableRoomsForCheckIn(hours, guestsQuantity = 1) {
+  function getAvailableRoomsForCheckIn(hours) {
     const stayHours = Number(hours)
-    const totalGuests = Number(guestsQuantity)
     if (!Number.isInteger(stayHours) || stayHours < 1 || stayHours > 168) return []
-    if (!Number.isInteger(totalGuests) || totalGuests < 1 || totalGuests > 99) return []
-    return hotelRooms.value.filter(room => room.status === 'available' && Number(room.capacity ?? 0) >= totalGuests)
+    return hotelRooms.value.filter(room => room.status === 'available')
   }
 
   async function sendNotification({ title, message, type = 'info' }) {
@@ -652,9 +606,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
         prepaidAmount: reservationAmount,
         paymentMethod: reservationData.paymentMethod ?? 'cash',
         paymentStatus: 'paid',
-        paidAt: new Date().toISOString(),
-        additionalGuestsJson: stringifyAdditionalGuests(reservationData.additionalGuests),
-        additionalGuests: reservationData.additionalGuests ?? []
+        paidAt: new Date().toISOString()
       })
       createdReservation = normalizeReservation(reservationResponse.data)
       reservations.value.push(createdReservation)
@@ -722,7 +674,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     if (!reservation) return { ok: false, message: 'front-desk.reservations.not-found' }
 
     const runtimeStatus = getReservationRuntimeStatus(reservation, now.value)
-    if (runtimeStatus !== 'active') return { ok: false, message: 'front-desk.reservations.not-ready-for-check-in' }
+    if (runtimeStatus !== 'readyForCheckIn') return { ok: false, message: 'front-desk.reservations.not-ready-for-check-in' }
 
     const room = getRoomById(reservation.roomId)
     if (!room) return { ok: false, message: 'front-desk.validation.valid-room' }
@@ -761,9 +713,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
         additionalAmount: 0,
         prepaidAmount: money(reservation.prepaidAmount),
         totalAmount: money(reservation.reservationAmount),
-        paymentStatus: reservation.paymentStatus === 'paid' ? 'paid' : 'pending',
-        additionalGuestsJson: stringifyAdditionalGuests(reservation.additionalGuests),
-        additionalGuests: reservation.additionalGuests ?? []
+        paymentStatus: reservation.paymentStatus === 'paid' ? 'paid' : 'pending'
       })
       createdStay = normalizeGuestStay({ ...stayResponse.data, guest: createdGuest })
       guestStays.value.push(createdStay)
@@ -839,9 +789,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
         additionalAmount: 0,
         prepaidAmount: 0,
         totalAmount: initialAmount,
-        paymentStatus: 'pending',
-        additionalGuestsJson: stringifyAdditionalGuests(checkInData.additionalGuests),
-        additionalGuests: checkInData.additionalGuests ?? []
+        paymentStatus: 'pending'
       })
       const stay = normalizeGuestStay({ ...stayResponse.data, guest })
       guestStays.value.push(stay)
@@ -1183,7 +1131,7 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
   function getReservationStatusLabel(status) {
     return {
       confirmed: 'Confirmada',
-      active: 'Activa',
+      readyForCheckIn: 'Lista para check-in',
       cancelled: 'Cancelada',
       completed: 'Finalizada'
     }[status] ?? status
@@ -1220,7 +1168,6 @@ const useHotelOperationsStore = defineStore('hotel-operations', () => {
     loadFromApi,
     getRoomById,
     getReservationById,
-    hasActiveStayByGuestDni,
     getStayById,
     getStayRuntimeStatus,
     getConsumptionTotal,

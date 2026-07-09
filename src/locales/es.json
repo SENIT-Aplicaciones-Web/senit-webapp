@@ -38,15 +38,7 @@
     "passwords-do-not-match": "Las contraseñas no coinciden.",
     "password-reset-successfully": "Contraseña actualizada correctamente. Inicia sesión con tu nueva contraseña.",
     "recovery-user-not-found": "No se encontró una cuenta con ese correo o la contraseña no es válida.",
-    "validation-username-format": "El nombre de usuario solo puede contener letras, números y guion bajo.",
-    "plan": "Plan de suscripción",
-    "selected-plan-help": "Se iniciará Stripe Checkout en modo test para el plan {plan} por S/ {amount} al mes.",
-    "validation-plan": "Seleccione un plan válido.",
-    "register-and-pay": "Registrar y pagar con Stripe",
-    "redirecting-checkout": "Redirigiendo a Stripe Checkout...",
-    "checkout-error": "No se pudo iniciar Stripe Checkout.",
-    "checkout-session-not-found": "No se encontró la sesión de checkout.",
-    "checkout-success-message": "Pago de prueba completado correctamente."
+    "validation-username-format": "El nombre de usuario solo puede contener letras, números y guion bajo."
   },
   "dashboard": {
     "title": "Panel principal",
@@ -56,11 +48,9 @@
     "role": "Rol"
   },
   "page-not-found": {
-    "kicker": "Error 404",
     "title": "Página no encontrada",
-    "content": "No encontramos la ruta {route} dentro de Senit. Puede que el enlace esté incompleto o que la página haya cambiado de ubicación.",
-    "go-home": "Ir al inicio de sesión",
-    "go-back": "Volver atrás"
+    "content": "La ruta {route} no está disponible.",
+    "go-home": "Ir al inicio"
   },
   "language": {
     "es": "ES",
@@ -165,15 +155,9 @@
         "email": "El correo debe contener {'@'}.",
         "room": "Seleccione una habitación disponible.",
         "hours": "Ingrese una cantidad de horas válida.",
-        "fix-fields": "Corrige los campos marcados antes de registrar el check-in.",
-        "complete-data-before-room": "Completa los datos obligatorios para seleccionar una habitación.",
-        "guest-active-stay": "El huésped ya tiene una estadía activa.",
-        "guests-quantity": "La cantidad de huéspedes debe estar entre 1 y 99."
+        "fix-fields": "Corrige los campos marcados antes de registrar el check-in."
       },
-      "payment-method": "Método de pago",
-      "additional-guests": "Huéspedes adicionales",
-      "additional-guests-quantity": "Cantidad de huéspedes adicionales",
-      "additional-guest-number": "Huésped adicional {number}"
+      "payment-method": "Método de pago"
     },
     "stay-details": {
       "title": "Detalles de Estadía",
@@ -299,8 +283,7 @@
       "active-rooms-with-alerts": "Habitaciones con alertas activas",
       "active-rooms-description": "Solo se muestran estadías por vencer o con salida vencida.",
       "search-by-room-or-guest": "Buscar alerta",
-      "search-placeholder-short": "N.º de habitación o huésped",
-      "time-expired": "Agotado"
+      "search-placeholder-short": "N.º de habitación o huésped"
     },
     "settings": {
       "title": "Configuración",
@@ -369,8 +352,7 @@
       "cancelled-successfully": "Reserva cancelada correctamente.",
       "start-stay": "Iniciar estadía",
       "not-ready-for-check-in": "La reserva solo puede iniciar estadía dentro de su horario programado.",
-      "check-in-created": "Estadía iniciada desde la reserva correctamente.",
-      "view-more": "Ver más"
+      "check-in-created": "Estadía iniciada desde la reserva correctamente."
     },
     "reservation-form": {
       "title": "Nueva reserva",
@@ -397,17 +379,13 @@
       "guarantee-help": "La reserva queda confirmada cuando se registra el pago del total de horas reservadas.",
       "amount-to-pay": "Monto a pagar",
       "placeholders": {
-        "guest-name": "Ej. Carlos Ramos",
+        "guest-name": "Ej. Juan Pérez",
         "dni": "8 dígitos",
         "phone": "9 dígitos",
-        "email": "correo@dominio.com",
-        "guests-quantity": "Máximo 99"
+        "email": "correo{'@'}dominio.com",
+        "guests-quantity": "Ej. 2"
       },
-      "capacity": "{capacity} huéspedes",
-      "additional-guests": "Huéspedes registrados",
-      "additional-guests-help": "Registra los datos de cada huésped adicional según la cantidad indicada.",
-      "guest-number": "Huésped {number}",
-      "complete-schedule-before-room": "Completa cantidad de huéspedes fecha y hora para seleccionar una habitación."
+      "capacity": "Capacidad {capacity}"
     },
     "navigation": {
       "reception": "Recepción",
@@ -507,8 +485,7 @@
       "cancelled": "Cancelada",
       "completed": "Finalizada",
       "pending": "Pendiente",
-      "ready-for-check-in": "Lista para check-in",
-      "active": "Activa"
+      "ready-for-check-in": "Lista para check-in"
     },
     "validation": {
       "valid-room": "Seleccione una habitación válida.",
@@ -525,22 +502,6 @@
       "valid-guests-quantity": "Ingrese una cantidad de huéspedes mayor a 0.",
       "guests-exceed-capacity": "La cantidad de huéspedes supera la capacidad de la habitación: {capacity}.",
       "start-in-past": "La fecha de inicio no puede ser anterior al momento actual."
-    },
-    "payment-methods": {
-      "cash": "Efectivo",
-      "card": "Tarjeta",
-      "transfer": "Transferencia",
-      "yape": "Yape"
-    },
-    "reservation-details": {
-      "title": "Detalles de la reserva",
-      "subtitle": "Encuentra todos los datos de la reserva",
-      "registered-guests": "Huéspedes registrados",
-      "main-guest": "Titular",
-      "additional-guest": "Huésped adicional",
-      "payment-method": "Método de pago",
-      "amount": "Monto",
-      "guests-quantity": "Cantidad de huéspedes"
     }
   },
   "admin": {
@@ -569,8 +530,7 @@
       "from-date": "Desde",
       "to-date": "Hasta",
       "no-revenue": "No hay ingresos en este rango",
-      "report-ready": "Reporte generado correctamente.",
-      "open-calendar": "Abrir calendario"
+      "report-ready": "Reporte generado correctamente."
     },
     "hotel": {
       "title": "Registro del hotel",
@@ -590,14 +550,7 @@
       "validation": {
         "not-found": "No se encontró el hotel activo."
       },
-      "updated-successfully": "Datos del hotel actualizados correctamente.",
-      "placeholders": {
-        "name": "Ej. Hotel Senit Lima",
-        "ruc": "11 dígitos",
-        "address": "Ej. Av. Javier Prado 123",
-        "phone": "Ej. 987654321",
-        "email": "contacto@hotel.com"
-      }
+      "updated-successfully": "Datos del hotel actualizados correctamente."
     },
     "rooms": {
       "title": "Gestión de habitaciones",
@@ -641,8 +594,7 @@
       "status-updated": "Estado de habitación actualizado.",
       "created-successfully": "Habitación registrada correctamente.",
       "updated-successfully": "Datos de habitación actualizados.",
-      "deleted-successfully": "Habitación eliminada correctamente.",
-      "guests-capacity": "{count} huéspedes"
+      "deleted-successfully": "Habitación eliminada correctamente."
     },
     "staff": {
       "title": "Personal y roles",
@@ -674,9 +626,7 @@
       },
       "created-successfully": "Usuario de personal registrado correctamente.",
       "updated-successfully": "Usuario actualizado correctamente.",
-      "deleted-successfully": "Usuario eliminado correctamente.",
-      "users": "Usuarios",
-      "new-password": "Nueva contraseña"
+      "deleted-successfully": "Usuario eliminado correctamente."
     },
     "feedback": {
       "hotel-updated": "Datos del hotel actualizados correctamente.",
@@ -749,20 +699,5 @@
     "export-ready": "Historial exportado correctamente.",
     "payment-history-description": "Pagos de suscripción registrados para el hotel.",
     "update-error": "No se pudo actualizar la suscripción."
-  },
-  "checkout": {
-    "success": {
-      "badge": "Suscripción",
-      "title": "Pago de prueba exitoso",
-      "pending-title": "Pago pendiente",
-      "loading": "Verificando sesión...",
-      "message": "Tu hotel y usuario administrador fueron activados. Ya puedes iniciar sesión con las credenciales registradas.",
-      "pending-message": "La sesión todavía no figura como completada en Stripe.",
-      "pending-status": "Pendiente",
-      "go-login": "Ir al inicio de sesión"
-    },
-    "stripe": {
-      "plan": "Plan"
-    }
   }
 }

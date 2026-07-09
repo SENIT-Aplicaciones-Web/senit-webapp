@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { toI18nKey } from '../../../../shared/application/locale-key.js'
@@ -22,36 +22,7 @@ const today = formatDateInputValue(currentDate)
 const firstDay = formatDateInputValue(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1))
 const fromDate = ref(firstDay)
 const toDate = ref(today)
-const fromDateInput = ref(null)
-const toDateInput = ref(null)
 const exportFeedback = ref({ type: '', message: '' })
-
-const minRevenueDate = computed(() => {
-  const hotelCreatedAt = operationsStore.activeHotel?.createdAt
-  if (!hotelCreatedAt) return firstDay
-  const createdDate = new Date(hotelCreatedAt)
-  return Number.isNaN(createdDate.getTime()) ? firstDay : formatDateInputValue(createdDate)
-})
-
-const maxRevenueDate = computed(() => today)
-
-watch(minRevenueDate, value => {
-  if (fromDate.value < value) fromDate.value = value
-})
-
-watch(toDate, value => {
-  if (value > maxRevenueDate.value) toDate.value = maxRevenueDate.value
-})
-
-function openDatePicker(inputRef) {
-  const input = typeof inputRef?.showPicker === 'function' || typeof inputRef?.focus === 'function'
-    ? inputRef
-    : inputRef?.value
-
-  if (!input) return
-  if (typeof input.showPicker === 'function') input.showPicker()
-  else input.focus()
-}
 
 const roomStatus = computed(() => {
   const statuses = ['available', 'occupied', 'cleaning', 'maintenance']
@@ -255,15 +226,15 @@ function resolveFeedbackMessage(message) {
           <div class="form-field">
             <label for="revenueFromDate">{{ t('admin.dashboard.from-date') }}</label>
             <div class="date-input-wrapper">
-              <input id="revenueFromDate" ref="fromDateInput" v-model="fromDate" type="date" :min="minRevenueDate" :max="maxRevenueDate" />
-              <button class="date-picker-trigger" type="button" :aria-label="t('admin.dashboard.open-calendar')" @click="openDatePicker(fromDateInput)"><i class="pi pi-calendar"></i></button>
+              <input id="revenueFromDate" v-model="fromDate" type="date" />
+              <i class="pi pi-calendar"></i>
             </div>
           </div>
           <div class="form-field">
             <label for="revenueToDate">{{ t('admin.dashboard.to-date') }}</label>
             <div class="date-input-wrapper">
-              <input id="revenueToDate" ref="toDateInput" v-model="toDate" type="date" :min="fromDate || minRevenueDate" :max="maxRevenueDate" />
-              <button class="date-picker-trigger" type="button" :aria-label="t('admin.dashboard.open-calendar')" @click="openDatePicker(toDateInput)"><i class="pi pi-calendar"></i></button>
+              <input id="revenueToDate" v-model="toDate" type="date" />
+              <i class="pi pi-calendar"></i>
             </div>
           </div>
         </div>
@@ -327,20 +298,12 @@ function resolveFeedbackMessage(message) {
   width: 100%;
   padding-right: 2.6rem;
 }
-.date-picker-trigger {
+.date-input-wrapper i {
   position: absolute;
-  right: 0.45rem;
-  width: 2rem;
-  height: 2rem;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
+  right: 0.85rem;
   color: #1e3a8a;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  pointer-events: none;
 }
-.date-picker-trigger:hover { background: #eef4ff; }
 .date-input-wrapper input::-webkit-calendar-picker-indicator {
   opacity: 0;
   cursor: pointer;

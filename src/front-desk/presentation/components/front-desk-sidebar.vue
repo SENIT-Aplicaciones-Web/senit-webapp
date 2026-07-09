@@ -17,7 +17,7 @@ const iamStore = useIamStore()
 const frontDeskStore = useFrontDeskStore()
 
 const isAdminShell = computed(() => props.mode === 'admin')
-const brandRoute = computed(() => isAdminShell.value ? '/admin/dashboard' : '/receptionist/dashboard')
+const brandRoute = computed(() => isAdminShell.value ? '/admin/dashboard' : '/front-desk/dashboard')
 const brandLabel = computed(() => t('brand.name'))
 const currentUser = computed(() => iamStore.currentUser ?? {})
 const initials = computed(() => {
@@ -72,17 +72,17 @@ function signOut() {
     <template v-else>
       <p class="sidebar-label">{{ t('front-desk.navigation.reception') }}</p>
       <nav class="sidebar-nav">
-        <router-link to="/receptionist/dashboard"><i class="pi pi-th-large"></i><span>{{ t('front-desk.navigation.control-panel') }}</span></router-link>
-        <router-link to="/receptionist/rooms"><i class="pi pi-building-columns"></i><span>{{ t('front-desk.navigation.rooms') }}</span></router-link>
-        <router-link to="/receptionist/stays"><i class="pi pi-users"></i><span>{{ t('front-desk.navigation.stays') }}</span></router-link>
-        <router-link to="/receptionist/check-in"><i class="pi pi-sign-in"></i><span>{{ t('front-desk.navigation.check-in') }}</span></router-link>
-        <router-link to="/receptionist/reservations"><i class="pi pi-calendar"></i><span>{{ t('front-desk.navigation.reservations') }}</span></router-link>
-        <router-link to="/receptionist/alerts" class="nav-link-with-badge">
+        <router-link to="/front-desk/dashboard"><i class="pi pi-th-large"></i><span>{{ t('front-desk.navigation.control-panel') }}</span></router-link>
+        <router-link to="/front-desk/rooms"><i class="pi pi-building-columns"></i><span>{{ t('front-desk.navigation.rooms') }}</span></router-link>
+        <router-link to="/front-desk/stays"><i class="pi pi-users"></i><span>{{ t('front-desk.navigation.stays') }}</span></router-link>
+        <router-link to="/front-desk/check-in"><i class="pi pi-sign-in"></i><span>{{ t('front-desk.navigation.check-in') }}</span></router-link>
+        <router-link to="/front-desk/reservations"><i class="pi pi-calendar"></i><span>{{ t('front-desk.navigation.reservations') }}</span></router-link>
+        <router-link to="/front-desk/alerts" class="nav-link-with-badge">
           <i class="pi pi-bell"></i>
           <span>{{ t('front-desk.navigation.alerts') }}</span>
           <span v-if="notificationCount > 0" class="sidebar-alert-badge">{{ notificationCount }}</span>
         </router-link>
-        <router-link to="/receptionist/settings"><i class="pi pi-cog"></i><span>{{ t('front-desk.navigation.settings') }}</span></router-link>
+        <router-link to="/front-desk/settings"><i class="pi pi-cog"></i><span>{{ t('front-desk.navigation.settings') }}</span></router-link>
       </nav>
     </template>
 

@@ -34,16 +34,6 @@ const useReservationsStore = defineStore('reservations', () => {
   }
 
   /**
-   * @summary Gets a reservation by its identifier.
-   * @param {number|string} reservationId Reservation id.
-   * @returns {object|null}
-   */
-  function getReservationById(reservationId) {
-    const reservation = dataContext.reservationsWithDetails.find(item => String(item.id ?? '') === String(reservationId ?? ''))
-    return reservation ?? null
-  }
-
-  /**
    * @summary Creates a confirmed reservation.
    * @param {object} reservationData Reservation form data.
    * @returns {{ok: boolean, message: string, reservation?: object}}
@@ -94,7 +84,6 @@ const useReservationsStore = defineStore('reservations', () => {
     hasProPlan,
     getReservationAvailableRooms,
     validateReservationAvailability,
-    getReservationById,
     createReservation,
     cancelReservation,
     startReservationStay,

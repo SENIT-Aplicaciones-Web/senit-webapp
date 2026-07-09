@@ -1,41 +1,30 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import useIamStore from '../../application/iam.store.js'
 import { SignUpCommand } from '../../domain/model/sign-up.command.js'
 import LanguageSwitcher from '../../../shared/presentation/components/language-switcher.vue'
 
 const { t } = useI18n()
-const route = useRoute()
 const router = useRouter()
 const iamStore = useIamStore()
-const logoUrl = `${import.meta.env.BASE_URL}senit-logo-full.png`
-
-const requestedPlan = route.query.plan === 'Pro' ? 'Pro' : 'Basic'
 
 onMounted(() => iamStore.clearMessages())
 
 const email = ref('')
 const username = ref('')
 const password = ref('')
-const selectedPlan = ref(requestedPlan)
 const showPassword = ref(false)
 const submitted = ref(false)
 const isSigningUp = ref(false)
 const usernamePattern = /^[A-Za-z0-9_]+$/
-const planOptions = [
-  { name: 'Basic', price: 29.99 },
-  { name: 'Pro', price: 49.99 }
-]
-const selectedPlanDetail = computed(() => planOptions.find(plan => plan.name === selectedPlan.value) ?? planOptions[0])
 const formErrors = computed(() => {
   const errors = []
   if (!email.value.trim() || !email.value.includes('@')) errors.push('auth.validation-email')
   if (!username.value.trim()) errors.push('auth.validation-username')
   else if (!usernamePattern.test(username.value.trim())) errors.push('auth.validation-username-format')
   if (!password.value || password.value.length < 6) errors.push('auth.validation-password')
-  if (!['Basic', 'Pro'].includes(selectedPlan.value)) errors.push('auth.validation-plan')
   return errors
 })
 
@@ -47,16 +36,15 @@ async function onSignUp() {
   const command = new SignUpCommand({
     email: email.value,
     username: username.value,
-    password: password.value,
-    plan: selectedPlan.value
+    password: password.value
   })
 
   isSigningUp.value = true
   try {
-    const session = await iamStore.startStripeSubscriptionCheckout(command)
+    const success = await iamStore.signUp(command)
 
-    if (session?.checkoutUrl) {
-      window.location.assign(session.checkoutUrl)
+    if (success) {
+      window.setTimeout(() => router.push({ name: 'admin-dashboard' }), 700)
     }
   } finally {
     isSigningUp.value = false
@@ -74,7 +62,7 @@ function goToSignIn() {
 
     <section class="brand-section">
       <div class="brand-content">
-        <img class="brand-logo-full" :src="logoUrl" :alt="t('brand.name')" />
+        <img class="brand-logo-full" src="/senit-logo-full.png" :alt="t('brand.name')" />
         <p class="brand-tagline">{{ t('brand.tagline') }}</p>
       </div>
     </section>
@@ -88,10 +76,6 @@ function goToSignIn() {
         <p class="admin-notice">{{ t('auth.admin-owner-notice') }}</p>
 
         <form @submit.prevent="onSignUp">
-          <label for="plan">{{ t('auth.plan') }}</label>
-          <span class="auth-input-icon"><i class="pi pi-credit-card"></i><select id="plan" v-model="selectedPlan" class="auth-input auth-select"><option v-for="plan in planOptions" :key="plan.name" :value="plan.name">{{ plan.name }} · S/ {{ plan.price }} / {{ t('subscription.month') }}</option></select></span>
-          <p class="plan-help">{{ t('auth.selected-plan-help', { plan: selectedPlanDetail.name, amount: selectedPlanDetail.price }) }}</p>
-
           <label for="email">{{ t('auth.email') }}</label>
           <span class="auth-input-icon"><i class="pi pi-envelope"></i><pv-input-text id="email" v-model="email" type="email" class="auth-input" /></span>
 
@@ -112,7 +96,7 @@ function goToSignIn() {
           </p>
 
           <div class="button-row">
-            <pv-button :label="isSigningUp ? t('auth.redirecting-checkout') : t('auth.register-and-pay')" type="submit" class="auth-button" :disabled="isSigningUp" />
+            <pv-button :label="t('auth.register')" type="submit" class="auth-button" :disabled="isSigningUp" />
             <pv-button :label="t('auth.back')" type="button" class="auth-button secondary-auth-button" :disabled="isSigningUp" @click="goToSignIn" />
           </div>
         </form>
@@ -237,19 +221,6 @@ label {
   font-size: 1.1rem;
 }
 
-.auth-select {
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #0f172a;
-  padding-left: 3rem;
-}
-
-.plan-help {
-  margin: 0.5rem 0 0;
-  color: #2563eb;
-  font-size: 0.95rem;
-}
-
 .admin-notice {
   margin: 0 0 0.9rem;
   color: #64748b;
@@ -287,74 +258,66 @@ label {
 .button-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin-top: 1rem;
+  gap: 2rem;
+  margin-top: 2.4rem;
 }
 
-.auth-button {
-  height: 56px;
-  border-radius: 999px;
-  border: none;
-  background: #1d4ed8;
-  color: #ffffff;
-  font-size: 1.05rem;
+.auth-button,
+.auth-button.p-button {
+  height: 74px;
+  border-radius: 12px;
+  font-size: 1.45rem;
   font-weight: 700;
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
 }
 
-.secondary-auth-button {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.error-message,
 .success-message {
-  margin: 0.9rem 0 0;
-  font-size: 0.95rem;
+  color: #16a34a;
+  margin: 1rem 0 0;
 }
 
 .error-message {
   color: #dc2626;
+  margin: 1rem 0 0;
 }
 
-.success-message {
-  color: #047857;
+.secondary-auth-button,
+.secondary-auth-button.p-button {
+  background: #eef4ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+}
+
+.secondary-auth-button :deep(.p-button-label) {
+  color: #1e3a8a;
 }
 
 footer {
   position: absolute;
-  bottom: 1.2rem;
+  bottom: 1rem;
   left: 0;
   right: 0;
   text-align: center;
-  color: #9ca3af;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  color: #111111;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1000px) {
   .auth-page {
     grid-template-columns: 1fr;
-    padding: 2rem 1.2rem 4rem;
+    padding: 2rem;
+    gap: 2rem;
   }
 
   .divider {
     display: none;
   }
 
-  .brand-section {
-    margin-bottom: 2rem;
-  }
-
-  .brand-content {
-    align-items: center;
-    text-align: center;
-  }
 
   .auth-card {
-    padding: 2rem 1.3rem;
-  }
-
-  .button-row {
-    grid-template-columns: 1fr;
+    padding: 2rem;
   }
 }
 </style>

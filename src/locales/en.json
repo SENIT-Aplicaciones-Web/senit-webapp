@@ -38,15 +38,7 @@
     "passwords-do-not-match": "Passwords do not match.",
     "password-reset-successfully": "Password updated successfully. Sign in with your new password.",
     "recovery-user-not-found": "No account was found with that email or the password is invalid.",
-    "validation-username-format": "Username can only contain letters, numbers and underscore.",
-    "plan": "Subscription plan",
-    "selected-plan-help": "Stripe Checkout test mode will start for the {plan} plan at S/ {amount} per month.",
-    "validation-plan": "Select a valid plan.",
-    "register-and-pay": "Register and pay with Stripe",
-    "redirecting-checkout": "Redirecting to Stripe Checkout...",
-    "checkout-error": "Stripe Checkout could not be started.",
-    "checkout-session-not-found": "The checkout session was not found.",
-    "checkout-success-message": "Test payment completed successfully."
+    "validation-username-format": "Username can only contain letters, numbers and underscore."
   },
   "dashboard": {
     "title": "Main dashboard",
@@ -56,11 +48,9 @@
     "role": "Role"
   },
   "page-not-found": {
-    "kicker": "Error 404",
     "title": "Page not found",
-    "content": "We could not find the path {route} inside Senit. The link may be incomplete or the page may have moved.",
-    "go-home": "Go to sign in",
-    "go-back": "Go back"
+    "content": "The path {route} is not available.",
+    "go-home": "Go home"
   },
   "language": {
     "es": "ES",
@@ -165,15 +155,9 @@
         "email": "The email must contain {'@'}.",
         "room": "Select an available room.",
         "hours": "Enter a valid number of hours.",
-        "fix-fields": "Fix the marked fields before registering check-in.",
-        "complete-data-before-room": "Complete the required data before selecting a room.",
-        "guest-active-stay": "The guest already has an active stay.",
-        "guests-quantity": "Guests quantity must be between 1 and 99."
+        "fix-fields": "Fix the marked fields before registering check-in."
       },
-      "payment-method": "Payment method",
-      "additional-guests": "Additional guests",
-      "additional-guests-quantity": "Additional guests quantity",
-      "additional-guest-number": "Additional guest {number}"
+      "payment-method": "Payment method"
     },
     "stay-details": {
       "title": "Stay Details",
@@ -299,8 +283,7 @@
       "active-rooms-with-alerts": "Rooms with active alerts",
       "active-rooms-description": "Only stays that are ending soon or overdue are shown.",
       "search-by-room-or-guest": "Search alert",
-      "search-placeholder-short": "Room number or guest",
-      "time-expired": "Expired"
+      "search-placeholder-short": "Room number or guest"
     },
     "settings": {
       "title": "Settings",
@@ -369,8 +352,7 @@
       "cancelled-successfully": "Reservation cancelled successfully.",
       "start-stay": "Start stay",
       "not-ready-for-check-in": "The reservation can start a stay only during its scheduled time window.",
-      "check-in-created": "Stay started from reservation successfully.",
-      "view-more": "View more"
+      "check-in-created": "Stay started from reservation successfully."
     },
     "reservation-form": {
       "title": "New reservation",
@@ -397,17 +379,13 @@
       "guarantee-help": "The reservation is confirmed when the full reserved-hours payment is recorded.",
       "amount-to-pay": "Amount to pay",
       "placeholders": {
-        "guest-name": "E.g. Carlos Ramos",
+        "guest-name": "E.g. John Smith",
         "dni": "8 digits",
         "phone": "9 digits",
-        "email": "email@domain.com",
-        "guests-quantity": "Maximum 99"
+        "email": "email{'@'}domain.com",
+        "guests-quantity": "E.g. 2"
       },
-      "capacity": "{capacity} guests",
-      "additional-guests": "Registered guests",
-      "additional-guests-help": "Register each additional guest according to the selected quantity.",
-      "guest-number": "Guest {number}",
-      "complete-schedule-before-room": "Complete guests quantity date and time before selecting a room."
+      "capacity": "Capacity {capacity}"
     },
     "navigation": {
       "reception": "Front desk",
@@ -507,8 +485,7 @@
       "cancelled": "Cancelled",
       "completed": "Completed",
       "pending": "Pending",
-      "ready-for-check-in": "Ready for check-in",
-      "active": "Active"
+      "ready-for-check-in": "Ready for check-in"
     },
     "validation": {
       "valid-room": "Select a valid room.",
@@ -525,22 +502,6 @@
       "valid-guests-quantity": "Enter a guests quantity greater than 0.",
       "guests-exceed-capacity": "The number of guests exceeds the room capacity: {capacity}.",
       "start-in-past": "The start date cannot be earlier than the current time."
-    },
-    "payment-methods": {
-      "cash": "Cash",
-      "card": "Card",
-      "transfer": "Transfer",
-      "yape": "Yape"
-    },
-    "reservation-details": {
-      "title": "Reservation details",
-      "subtitle": "Find all reservation information",
-      "registered-guests": "Registered guests",
-      "main-guest": "Main guest",
-      "additional-guest": "Additional guest",
-      "payment-method": "Payment method",
-      "amount": "Amount",
-      "guests-quantity": "Guests quantity"
     }
   },
   "admin": {
@@ -569,8 +530,7 @@
       "from-date": "From",
       "to-date": "To",
       "no-revenue": "No revenue in this range",
-      "report-ready": "Report generated successfully.",
-      "open-calendar": "Open calendar"
+      "report-ready": "Report generated successfully."
     },
     "hotel": {
       "title": "Hotel registration",
@@ -590,14 +550,7 @@
       "validation": {
         "not-found": "Active hotel not found."
       },
-      "updated-successfully": "Hotel data updated successfully.",
-      "placeholders": {
-        "name": "E.g. Hotel Senit Lima",
-        "ruc": "11 digits",
-        "address": "E.g. 123 Javier Prado Ave.",
-        "phone": "E.g. 987654321",
-        "email": "contact@hotel.com"
-      }
+      "updated-successfully": "Hotel data updated successfully."
     },
     "rooms": {
       "title": "Room management",
@@ -641,8 +594,7 @@
       "status-updated": "Room status updated.",
       "created-successfully": "Room registered successfully.",
       "updated-successfully": "Room data updated.",
-      "deleted-successfully": "Room deleted successfully.",
-      "guests-capacity": "{count} guests"
+      "deleted-successfully": "Room deleted successfully."
     },
     "staff": {
       "title": "Staff and roles",
@@ -674,9 +626,7 @@
       },
       "created-successfully": "Staff user registered successfully.",
       "updated-successfully": "User updated successfully.",
-      "deleted-successfully": "User deleted successfully.",
-      "users": "Users",
-      "new-password": "New password"
+      "deleted-successfully": "User deleted successfully."
     },
     "feedback": {
       "hotel-updated": "Hotel data updated successfully.",
@@ -749,20 +699,5 @@
     "export-ready": "History exported successfully.",
     "payment-history-description": "Subscription payments registered for the hotel.",
     "update-error": "The subscription could not be updated."
-  },
-  "checkout": {
-    "success": {
-      "badge": "Subscription",
-      "title": "Test payment successful",
-      "pending-title": "Payment pending",
-      "loading": "Verifying session...",
-      "message": "Your hotel and administrator user were activated. You can now sign in with the registered credentials.",
-      "pending-message": "The session is not completed in Stripe yet.",
-      "pending-status": "Pending",
-      "go-login": "Go to sign in"
-    },
-    "stripe": {
-      "plan": "Plan"
-    }
   }
 }

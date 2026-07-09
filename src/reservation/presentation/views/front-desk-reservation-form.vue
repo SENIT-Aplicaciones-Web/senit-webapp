@@ -20,8 +20,7 @@ const form = reactive({
   startTime: '',
   endDate: '',
   endTime: '',
-  paymentMethod: 'cash',
-  additionalGuests: []
+  paymentMethod: 'cash'
 })
 const errors = reactive({})
 const feedback = ref({ type: '', message: '' })
@@ -35,19 +34,7 @@ function toDateInputValue(date) {
 const todayDate = computed(() => toDateInputValue(new Date()))
 const startAt = computed(() => form.startDate && form.startTime ? `${form.startDate}T${form.startTime}:00` : '')
 const endAt = computed(() => form.endDate && form.endTime ? `${form.endDate}T${form.endTime}:00` : '')
-const totalGuests = computed(() => Math.max(Number(form.guestsQuantity) || 1, 1))
-const additionalGuestCount = computed(() => Math.max(totalGuests.value - 1, 0))
-const canSelectRoom = computed(() => {
-  const start = new Date(startAt.value).getTime()
-  const end = new Date(endAt.value).getTime()
-  return Number.isInteger(totalGuests.value) && totalGuests.value >= 1 && totalGuests.value <= 99 &&
-    Boolean(startAt.value && endAt.value) &&
-    !Number.isNaN(start) && !Number.isNaN(end) &&
-    start >= Date.now() && end > start
-})
-const availableRoomsForSchedule = computed(() => canSelectRoom.value
-  ? reservationsStore.getReservationAvailableRooms({ startAt: startAt.value, endAt: endAt.value, guestsQuantity: totalGuests.value })
-  : [])
+const availableRoomsForSchedule = computed(() => reservationsStore.getReservationAvailableRooms({ startAt: startAt.value, endAt: endAt.value }))
 const selectedRoom = computed(() => reservationsStore.rooms.find(room => String(room.id) === String(form.roomId)) ?? null)
 const selectedRoomCapacity = computed(() => Number(selectedRoom.value?.capacity ?? 0))
 const reservationHours = computed(() => {
@@ -60,18 +47,7 @@ const reservationHours = computed(() => {
 })
 const reservationAmount = computed(() => Number((reservationHours.value * Number(selectedRoom.value?.pricePerHour ?? 0)).toFixed(2)))
 
-watch(() => form.guestsQuantity, () => {
-  const nextCount = additionalGuestCount.value
-  while (form.additionalGuests.length < nextCount) form.additionalGuests.push({ fullName: '', dni: '' })
-  if (form.additionalGuests.length > nextCount) form.additionalGuests.splice(nextCount)
-  if (form.roomId && selectedRoomCapacity.value && totalGuests.value > selectedRoomCapacity.value) form.roomId = ''
-})
-
-watch([startAt, endAt, totalGuests], () => {
-  if (!canSelectRoom.value) {
-    form.roomId = ''
-    return
-  }
+watch([startAt, endAt, () => form.roomId], () => {
   if (!form.roomId) return
   const roomStillAvailable = availableRoomsForSchedule.value.some(room => String(room.id) === String(form.roomId))
   if (!roomStillAvailable) form.roomId = ''
@@ -85,40 +61,22 @@ function sanitizeDigits(field, maxLength) {
   form[field] = String(form[field] ?? '').replace(/\D/g, '').slice(0, maxLength)
 }
 
-function sanitizeAdditionalGuestDni(index) {
-  form.additionalGuests[index].dni = String(form.additionalGuests[index].dni ?? '').replace(/\D/g, '').slice(0, 8)
-}
-
 function setError(field, message) { errors[field] = message }
 function clearErrors() { Object.keys(errors).forEach(key => delete errors[key]) }
-
-function validateAdditionalGuests() {
-  let valid = true
-  form.additionalGuests.forEach((guest, index) => {
-    if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]{3,80}$/.test(String(guest.fullName ?? '').trim())) {
-      setError(`additionalGuestName${index}`, t('front-desk.validation.valid-guest-name'))
-      valid = false
-    }
-    if (!/^\d{8}$/.test(String(guest.dni ?? '').trim())) {
-      setError(`additionalGuestDni${index}`, t('front-desk.validation.valid-dni'))
-      valid = false
-    }
-  })
-  return valid
-}
-
 function validate() {
   clearErrors()
   let valid = true
   const guestName = form.guestName.trim()
   const email = form.email.trim()
+  const guestsQuantity = Number(form.guestsQuantity)
 
   if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]{3,80}$/.test(guestName)) { setError('guestName', t('front-desk.validation.valid-guest-name')); valid = false }
   if (!/^\d{8}$/.test(form.dni.trim())) { setError('dni', t('front-desk.validation.valid-dni')); valid = false }
   if (!/^\d{9}$/.test(form.phone.trim())) { setError('phone', t('front-desk.validation.valid-phone')); valid = false }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('email', t('front-desk.validation.valid-email')); valid = false }
-  if (!Number.isInteger(totalGuests.value) || totalGuests.value < 1 || totalGuests.value > 99) { setError('guestsQuantity', t('front-desk.validation.valid-guests-quantity')); valid = false }
-  if (!validateAdditionalGuests()) valid = false
+  if (!form.roomId) { setError('roomId', t('front-desk.reservation-form.select-room')); valid = false }
+  if (!Number.isInteger(guestsQuantity) || guestsQuantity < 1) { setError('guestsQuantity', t('front-desk.validation.valid-guests-quantity')); valid = false }
+  if (selectedRoomCapacity.value && guestsQuantity > selectedRoomCapacity.value) { setError('guestsQuantity', t('front-desk.validation.guests-exceed-capacity', { capacity: selectedRoomCapacity.value })); valid = false }
   if (!form.startDate || !form.startTime) { setError('startAt', t('front-desk.reservation-form.start-date')); valid = false }
   if (!form.endDate || !form.endTime) { setError('endAt', t('front-desk.reservation-form.end-date')); valid = false }
 
@@ -127,26 +85,12 @@ function validate() {
     valid = false
   }
 
-  if (!canSelectRoom.value) {
-    setError('roomId', t('front-desk.reservation-form.complete-schedule-before-room'))
-    valid = false
-  } else if (!form.roomId) {
-    setError('roomId', t('front-desk.reservation-form.select-room'))
-    valid = false
-  }
-
-  if (selectedRoomCapacity.value && totalGuests.value > selectedRoomCapacity.value) {
-    setError('guestsQuantity', t('front-desk.validation.guests-exceed-capacity', { capacity: selectedRoomCapacity.value }))
-    valid = false
-  }
-
   if (valid) {
-    const availability = reservationsStore.validateReservationAvailability({ roomId: form.roomId, startAt: startAt.value, endAt: endAt.value, guestsQuantity: totalGuests.value })
+    const availability = reservationsStore.validateReservationAvailability({ roomId: form.roomId, startAt: startAt.value, endAt: endAt.value })
     if (!availability.valid) { setError('roomId', t(availability.message)); valid = false }
   }
   return valid
 }
-
 async function submitReservation() {
   if (isSubmitting.value) return
   feedback.value = { type: '', message: '' }
@@ -156,7 +100,7 @@ async function submitReservation() {
   }
   isSubmitting.value = true
   try {
-    const result = await reservationsStore.createReservation({ ...form, startAt: startAt.value, endAt: endAt.value, guestsQuantity: totalGuests.value })
+    const result = await reservationsStore.createReservation({ ...form, startAt: startAt.value, endAt: endAt.value })
     feedback.value = { type: result.ok ? 'success' : 'error', message: result.message }
     if (result.ok) window.setTimeout(goBackToReservations, 1400)
   } finally {
@@ -181,17 +125,17 @@ function resolveFeedbackMessage(message) {
         <div class="panel-header"><h2>{{ t('front-desk.reservation-form.owner-data') }}</h2></div>
         <div class="form-grid">
           <div class="form-field full">
-            <label for="guestName">{{ t('front-desk.reservation-form.guest-name') }} <span class="required-symbol">*</span></label>
+            <label for="guestName">{{ t('front-desk.reservation-form.guest-name') }}</label>
             <input id="guestName" v-model.trim="form.guestName" type="text" :aria-invalid="Boolean(errors.guestName)" :placeholder="t('front-desk.reservation-form.placeholders.guest-name')" />
             <p class="validation-message">{{ errors.guestName }}</p>
           </div>
           <div class="form-field">
-            <label for="dni">{{ t('front-desk.reservation-form.dni') }} <span class="required-symbol">*</span></label>
+            <label for="dni">{{ t('front-desk.reservation-form.dni') }}</label>
             <input id="dni" v-model="form.dni" maxlength="8" inputmode="numeric" :aria-invalid="Boolean(errors.dni)" :placeholder="t('front-desk.reservation-form.placeholders.dni')" @input="sanitizeDigits('dni', 8)" />
             <p class="validation-message">{{ errors.dni }}</p>
           </div>
           <div class="form-field">
-            <label for="phone">{{ t('front-desk.reservation-form.phone') }} <span class="required-symbol">*</span></label>
+            <label for="phone">{{ t('front-desk.reservation-form.phone') }}</label>
             <input id="phone" v-model="form.phone" maxlength="9" inputmode="numeric" :aria-invalid="Boolean(errors.phone)" :placeholder="t('front-desk.reservation-form.placeholders.phone')" @input="sanitizeDigits('phone', 9)" />
             <p class="validation-message">{{ errors.phone }}</p>
           </div>
@@ -201,51 +145,30 @@ function resolveFeedbackMessage(message) {
             <p class="validation-message">{{ errors.email }}</p>
           </div>
         </div>
-
-        <div class="additional-guests-section">
-          <h3>{{ t('front-desk.reservation-form.additional-guests') }}</h3>
-          <p class="help-message">{{ t('front-desk.reservation-form.additional-guests-help') }}</p>
-          <article v-for="(guest, index) in form.additionalGuests" :key="index" class="additional-guest-card">
-            <strong>{{ t('front-desk.reservation-form.guest-number', { number: index + 2 }) }}</strong>
-            <div class="form-grid">
-              <div class="form-field">
-                <label>{{ t('front-desk.reservation-form.guest-name') }} <span class="required-symbol">*</span></label>
-                <input v-model.trim="guest.fullName" type="text" :placeholder="t('front-desk.reservation-form.placeholders.guest-name')" />
-                <p class="validation-message">{{ errors[`additionalGuestName${index}`] }}</p>
-              </div>
-              <div class="form-field">
-                <label>{{ t('front-desk.reservation-form.dni') }} <span class="required-symbol">*</span></label>
-                <input v-model="guest.dni" type="text" maxlength="8" inputmode="numeric" :placeholder="t('front-desk.reservation-form.placeholders.dni')" @input="sanitizeAdditionalGuestDni(index)" />
-                <p class="validation-message">{{ errors[`additionalGuestDni${index}`] }}</p>
-              </div>
-            </div>
-          </article>
-        </div>
       </section>
 
       <section class="form-card">
         <div class="panel-header"><h2>{{ t('front-desk.reservation-form.reservation-data') }}</h2></div>
         <div class="form-grid">
-          <div class="form-field">
-            <label for="guestsQuantity">{{ t('front-desk.reservation-form.guests-quantity') }} <span class="required-symbol">*</span></label>
-            <input id="guestsQuantity" v-model.number="form.guestsQuantity" min="1" max="99" type="number" :aria-invalid="Boolean(errors.guestsQuantity)" :placeholder="t('front-desk.reservation-form.placeholders.guests-quantity')" />
-            <p class="validation-message">{{ errors.guestsQuantity }}</p>
-          </div>
-          <div class="form-field"><label for="startDate">{{ t('front-desk.reservation-form.start-date') }} <span class="required-symbol">*</span></label><input id="startDate" v-model="form.startDate" type="date" :min="todayDate" :aria-invalid="Boolean(errors.startAt)" /><p class="validation-message">{{ errors.startAt }}</p></div>
-          <div class="form-field"><label for="startTime">{{ t('front-desk.reservation-form.start-time') }} <span class="required-symbol">*</span></label><input id="startTime" v-model="form.startTime" type="time" /></div>
-          <div class="form-field"><label for="endDate">{{ t('front-desk.reservation-form.end-date') }} <span class="required-symbol">*</span></label><input id="endDate" v-model="form.endDate" type="date" :min="form.startDate || todayDate" :aria-invalid="Boolean(errors.endAt)" /><p class="validation-message">{{ errors.endAt }}</p></div>
-          <div class="form-field"><label for="endTime">{{ t('front-desk.reservation-form.end-time') }} <span class="required-symbol">*</span></label><input id="endTime" v-model="form.endTime" type="time" /></div>
           <div class="form-field full">
-            <label for="roomId">{{ t('front-desk.reservation-form.room') }} <span class="required-symbol">*</span></label>
-            <select id="roomId" v-model="form.roomId" :disabled="!canSelectRoom" :aria-invalid="Boolean(errors.roomId)">
+            <label for="roomId">{{ t('front-desk.reservation-form.room') }}</label>
+            <select id="roomId" v-model="form.roomId" :aria-invalid="Boolean(errors.roomId)">
               <option value="">{{ t('front-desk.reservation-form.select-room') }}</option>
               <option v-for="room in availableRoomsForSchedule" :key="room.id" :value="room.id">
-                {{ t('front-desk.common.room-abbr') }} {{ room.number }} · {{ t('front-desk.rooms.floor-with-number', { floor: room.floor }) }} · {{ t('front-desk.reservation-form.capacity', { capacity: room.capacity }) }} · S/ {{ Number(room.pricePerHour).toFixed(2) }}/h
+                {{ t('front-desk.common.room-abbr') }} {{ room.number }} · {{ room.type }} · {{ reservationsStore.getRoomStatusLabel(room.status) }} · {{ t('front-desk.reservation-form.capacity', { capacity: room.capacity }) }}
               </option>
             </select>
-            <p class="help-message" v-if="!canSelectRoom">{{ t('front-desk.reservation-form.complete-schedule-before-room') }}</p>
             <p class="validation-message">{{ errors.roomId }}</p>
           </div>
+          <div class="form-field">
+            <label for="guestsQuantity">{{ t('front-desk.reservation-form.guests-quantity') }}</label>
+            <input id="guestsQuantity" v-model.number="form.guestsQuantity" min="1" :max="selectedRoomCapacity || undefined" type="number" :aria-invalid="Boolean(errors.guestsQuantity)" :placeholder="t('front-desk.reservation-form.placeholders.guests-quantity')" />
+            <p class="validation-message">{{ errors.guestsQuantity }}</p>
+          </div>
+          <div class="form-field"><label for="startDate">{{ t('front-desk.reservation-form.start-date') }}</label><input id="startDate" v-model="form.startDate" type="date" :min="todayDate" :aria-invalid="Boolean(errors.startAt)" /><p class="validation-message">{{ errors.startAt }}</p></div>
+          <div class="form-field"><label for="startTime">{{ t('front-desk.reservation-form.start-time') }}</label><input id="startTime" v-model="form.startTime" type="time" /></div>
+          <div class="form-field"><label for="endDate">{{ t('front-desk.reservation-form.end-date') }}</label><input id="endDate" v-model="form.endDate" type="date" :min="form.startDate || todayDate" :aria-invalid="Boolean(errors.endAt)" /><p class="validation-message">{{ errors.endAt }}</p></div>
+          <div class="form-field"><label for="endTime">{{ t('front-desk.reservation-form.end-time') }}</label><input id="endTime" v-model="form.endTime" type="time" /></div>
         </div>
 
         <div class="reservation-payment-box">
@@ -253,7 +176,7 @@ function resolveFeedbackMessage(message) {
           <p>{{ t('front-desk.reservation-form.guarantee-help') }}</p>
           <div class="form-grid">
             <div class="form-field">
-              <label for="paymentMethod">{{ t('front-desk.checkout.payment-method') }} <span class="required-symbol">*</span></label>
+              <label for="paymentMethod">{{ t('front-desk.checkout.payment-method') }}</label>
               <select id="paymentMethod" v-model="form.paymentMethod">
                 <option value="cash">{{ t('front-desk.checkout.cash') }}</option>
                 <option value="card">{{ t('front-desk.checkout.card') }}</option>
@@ -279,7 +202,10 @@ function resolveFeedbackMessage(message) {
 </template>
 
 <style scoped>
-.reservation-actions { margin-top: 1rem; }
+.reservation-actions {
+  margin-top: 1rem;
+}
+
 .reservation-payment-box {
   margin-top: 1.1rem;
   padding: 1rem;
@@ -287,14 +213,20 @@ function resolveFeedbackMessage(message) {
   border-radius: 16px;
   background: #f8fbff;
 }
-.reservation-payment-box h3,
-.additional-guests-section h3 {
+
+.reservation-payment-box h3 {
   margin: 0 0 0.35rem;
   color: #1e3a8a;
   font-size: 1.05rem;
   font-weight: 650;
 }
-.reservation-payment-box p { margin: 0 0 0.85rem; color: #64748b; font-size: 0.9rem; }
+
+.reservation-payment-box p {
+  margin: 0 0 0.85rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
 .reservation-amount-card {
   min-height: 46px;
   display: grid;
@@ -304,10 +236,16 @@ function resolveFeedbackMessage(message) {
   border-radius: 14px;
   background: #ffffff;
 }
+
 .reservation-amount-card span,
-.reservation-amount-card small { color: #64748b; font-size: 0.78rem; }
-.reservation-amount-card strong { color: #1e3a8a; font-size: 1.25rem; font-weight: 700; }
-.additional-guests-section { margin-top: 1rem; display: grid; gap: 0.8rem; }
-.additional-guest-card { padding: 0.9rem; border: 1px solid #dbeafe; border-radius: 16px; background: #f8fbff; }
-.additional-guest-card strong { display: block; margin-bottom: 0.6rem; color: #1e3a8a; }
+.reservation-amount-card small {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.reservation-amount-card strong {
+  color: #1e3a8a;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
 </style>

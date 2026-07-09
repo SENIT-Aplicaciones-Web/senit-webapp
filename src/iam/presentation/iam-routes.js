@@ -1,6 +1,5 @@
 const signIn = () => import('./views/sign-in.vue')
 const signUp = () => import('./views/sign-up.vue')
-const checkoutSuccess = () => import('./views/checkout-success.vue')
 
 const iamRoutes = [
     {
@@ -14,12 +13,6 @@ const iamRoutes = [
         name: 'sign-up',
         component: signUp,
         meta: { title: 'Sign Up' }
-    },
-    {
-        path: '/checkout/success',
-        name: 'checkout-success',
-        component: checkoutSuccess,
-        meta: { title: 'Checkout Success' }
     }
 ]
 
